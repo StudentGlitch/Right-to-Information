@@ -2,6 +2,7 @@ import { useState, useMemo, useCallback, useRef } from "react";
 import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, BarChart, Bar, Cell, Legend, PieChart, Pie } from "recharts";
 import { _OWNERS } from "./owners_data";
 import OnboardingTour from "./OnboardingTour";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 
 // Compact encoded data: [code,issuer,hhi,hl(0=Low,1=Mod,2=High),ens,ff,c1,c3,fr,ss,ip,flags_bits,tier(0=Red,1=Amber,2=Green),th,tht,hc,nd]
 // flags bits: 0=Insider>75%, 1=SingleCP>50%, 2=LowFloat<15%, 3=CritFloat<5%, 4=ZeroForeign
@@ -886,6 +887,7 @@ export default function App() {
                     </div>
                 )}
             </div>
+            <SpeedInsights />
         </div>
     );
 }
