@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, useRef } from "react";
+import { useState, useMemo, useCallback, useRef, useEffect } from "react";
 import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, BarChart, Bar, Cell, Legend, PieChart, Pie } from "recharts";
 import { _OWNERS } from "./owners_data";
 import OnboardingTour from "./OnboardingTour";
@@ -203,6 +203,22 @@ export default function App() {
     const [ownerTypeFilter, setOwnerTypeFilter] = useState("All");
     const [ownerSearch, setOwnerSearch] = useState("");
     const [expandedPortfolios, setExpandedPortfolios] = useState({});
+    const [drawerOpen, setDrawerOpen] = useState(false);
+    const drawerRef = useRef(null);
+
+    useEffect(() => {
+        if (!drawerOpen) return;
+        const handleKey = (e) => { if (e.key === "Escape") setDrawerOpen(false); };
+        const handleOutside = (e) => {
+            if (drawerRef.current && !drawerRef.current.contains(e.target)) setDrawerOpen(false);
+        };
+        document.addEventListener("keydown", handleKey);
+        document.addEventListener("mousedown", handleOutside);
+        return () => {
+            document.removeEventListener("keydown", handleKey);
+            document.removeEventListener("mousedown", handleOutside);
+        };
+    }, [drawerOpen]);
 
     const filtered = useMemo(() => {
         let d = RAW;
@@ -376,21 +392,150 @@ export default function App() {
         { key: "ss", label: "Stability" },
     ];
 
+    // NAV_TABS — shared by both the desktop tab bar and the mobile hamburger drawer.
+    // "HHI" is an intentional abbreviation of "HHI Distribution" to keep labels compact.
+    const NAV_TABS = [["overview", "Overview"], ["scatter", "Risk Map"], ["hhi", "HHI"], ["flags", "Flags"], ["table", "Screener"], ["owners", "Owners"]];
+
     return (
-        <div style={{ background: "#060d18", minHeight: "100vh", color: "#e8f4f8", fontFamily: "'DM Sans', sans-serif", padding: "0 0 40px" }}>
+        <div className="app-root" style={{ background: "#060d18", minHeight: "100vh", color: "#e8f4f8", fontFamily: "'DM Sans', sans-serif", padding: "0 0 40px" }}>
+            <style>{`
+                /* ── Mobile-first responsive system ──────────────────────────── */
+                /* Reference breakpoints (md=768px is the primary split point):   */
+                /* xs: 320px | sm: 375px | md: 768px | lg: 1024px | xl: 1440px   */
+                .app-root { overflow-x: hidden; }
+
+                /* Header */
+                .app-header { padding: clamp(12px, 4vw, 20px) clamp(12px, 4vw, 28px) 14px; }
+                .header-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+                .header-title { font-size: clamp(0.875rem, 5vw, 1.375rem); margin: 0; font-weight: 700; color: #e8f4f8; }
+                .header-eyebrow { font-size: clamp(0.625rem, 2.5vw, 0.6875rem); letter-spacing: 3px; color: #457B9D; font-family: "DM Mono", monospace; margin-bottom: 4px; }
+                .header-right { display: flex; gap: 10px; align-items: center; }
+
+                /* Search */
+                .search-wrap { position: relative; display: flex; align-items: center; }
+                .search-input { background: #0d1e30; border-radius: 20px; color: #e8f4f8; padding: 8px 34px 8px 32px; font-size: 0.75rem; outline: none; transition: border-color 0.2s; width: clamp(140px, 40vw, 260px); }
+
+                /* Hamburger button — hidden on desktop, shown on mobile */
+                .hamburger-btn {
+                    display: none;
+                    align-items: center; justify-content: center;
+                    background: none; border: 1px solid #1e3a52;
+                    color: #a8c8e8; border-radius: 6px;
+                    width: 44px; height: 44px;
+                    font-size: 1.25rem; cursor: pointer; flex-shrink: 0;
+                }
+
+                /* Tab nav — desktop horizontal row */
+                .tab-nav-desktop {
+                    display: flex; gap: 0;
+                    border-bottom: 1px solid #132030;
+                    padding-left: clamp(12px, 4vw, 28px);
+                    background: #09131f;
+                    overflow-x: auto;
+                    -webkit-overflow-scrolling: touch;
+                    scrollbar-width: none;
+                }
+                .tab-nav-desktop::-webkit-scrollbar { display: none; }
+
+                /* Content area */
+                .content-area { padding: clamp(12px, 4vw, 20px) clamp(12px, 4vw, 28px); }
+
+                /* Overview two-column grid → single column on mobile */
+                .overview-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
+
+                /* Side-by-side layouts → stack on mobile */
+                .scatter-layout { display: flex; flex-direction: column; gap: 16px; align-items: stretch; }
+                .screener-layout { display: flex; flex-direction: column; gap: 16px; align-items: stretch; }
+
+                /* Mobile drawer overlay */
+                .drawer-overlay {
+                    display: none;
+                    position: fixed; inset: 0; z-index: 200;
+                    background: rgba(0,0,0,0.6);
+                }
+                .drawer-overlay.open { display: block; }
+                .mobile-drawer {
+                    position: fixed; top: 0; left: 0; bottom: 0; z-index: 201;
+                    width: min(280px, 85vw);
+                    background: #0d1e30; border-right: 1px solid #1e3a52;
+                    padding: 24px 0;
+                    transform: translateX(-100%);
+                    transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
+                    display: flex; flex-direction: column;
+                    overflow-y: auto;
+                }
+                .mobile-drawer.open { transform: translateX(0); }
+                .drawer-close {
+                    align-self: flex-end;
+                    margin-right: 20px; margin-bottom: 16px;
+                    background: none; border: 1px solid #1e3a52;
+                    color: #a8c8e8; border-radius: 6px;
+                    width: 44px; height: 44px;
+                    font-size: 1.25rem; cursor: pointer;
+                    display: flex; align-items: center; justify-content: center;
+                }
+                .drawer-nav-btn {
+                    background: none; border: none; text-align: left;
+                    padding: 14px 24px; font-size: 0.9375rem;
+                    font-family: "DM Mono", monospace; letter-spacing: 0.5px;
+                    cursor: pointer; transition: background 0.15s;
+                    min-height: 52px; display: flex; align-items: center;
+                    border-left: 3px solid transparent;
+                }
+                .drawer-nav-btn.active {
+                    color: #a8d8ea;
+                    background: #132030;
+                    border-left-color: #457B9D;
+                }
+                .drawer-nav-btn:not(.active) { color: #6b8aad; }
+                .drawer-nav-btn:hover:not(.active) { background: #09131f; }
+
+                /* ── min-width (tablet and up) overrides ───────────────────── */
+                @media (min-width: 768px) {
+                    .overview-grid { grid-template-columns: 1fr 1fr; }
+                    .scatter-layout { flex-direction: row; align-items: flex-start; }
+                    .screener-layout { flex-direction: row; align-items: flex-start; }
+                    .hamburger-btn { display: none !important; }
+                    .tab-nav-desktop { overflow-x: visible; }
+                }
+
+                /* KPI cards — base rule; mobile override below forces 2 columns */
+                .kpi-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1px; background: #132030; border-bottom: 1px solid #132030; }
+
+                /* ── max-width mobile overrides (< 768px) ───────────────────── */
+                @media (max-width: 767px) {
+                    .hamburger-btn { display: flex; }
+                    .tab-nav-desktop { display: none; }
+                    .kpi-cards { grid-template-columns: repeat(2, 1fr); }
+                }
+            `}</style>
             <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
             <OnboardingTour />
 
+            {/* Mobile Nav Drawer */}
+            <div className={`drawer-overlay${drawerOpen ? " open" : ""}`} aria-hidden="true" />
+            <nav ref={drawerRef} className={`mobile-drawer${drawerOpen ? " open" : ""}`} aria-label="Mobile navigation">
+                <button className="drawer-close" onClick={() => setDrawerOpen(false)} aria-label="Close navigation">✕</button>
+                {NAV_TABS.map(([id, label]) => (
+                    <button
+                        key={id}
+                        className={`drawer-nav-btn${activeTab === id ? " active" : ""}`}
+                        onClick={() => { setActiveTab(id); setDrawerOpen(false); }}
+                        aria-current={activeTab === id ? "page" : undefined}
+                    >{label}</button>
+                ))}
+            </nav>
+
             {/* Header */}
-            <div style={{ background: "linear-gradient(180deg, #0d1e30 0%, #09131f 100%)", borderBottom: "1px solid #132030", padding: "20px 28px 16px" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
+            <div className="app-header" style={{ background: "linear-gradient(180deg, #0d1e30 0%, #09131f 100%)", borderBottom: "1px solid #132030" }}>
+                <div className="header-row">
                     <div>
-                        <div style={{ fontSize: 11, letterSpacing: 3, color: "#457B9D", fontFamily: "DM Mono, monospace", marginBottom: 4 }}>IDX · BURSA EFEK INDONESIA · 27 FEB 2026</div>
-                        <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700, color: "#e8f4f8" }}>{dynamicTitle}</h1>
+                        <div className="header-eyebrow">IDX · BURSA EFEK INDONESIA · 27 FEB 2026</div>
+                        <h1 className="header-title">{dynamicTitle}</h1>
                     </div>
-                    <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+                    <div className="header-right">
                         {/* Global Search — top-right, always visible */}
-                        <div data-tour="search" style={{ position: "relative", display: "flex", alignItems: "center" }}>
+                        <div data-tour="search" className="search-wrap">
                             <span aria-hidden="true" style={{ position: "absolute", left: 10, color: "#457B9D", fontSize: 13, pointerEvents: "none", userSelect: "none" }}>🔍</span>
                             <input
                                 value={search}
@@ -398,16 +543,9 @@ export default function App() {
                                 placeholder="Search stock, issuer, or owner…"
                                 aria-label="Search stocks by code, issuer name, or top owner"
                                 title="Search across all stocks by code, issuer name, or top owner"
+                                className="search-input"
                                 style={{
-                                    background: "#0d1e30",
                                     border: `1px solid ${search ? "#457B9D" : "#1e3a52"}`,
-                                    borderRadius: 20,
-                                    color: "#e8f4f8",
-                                    padding: "8px 34px 8px 32px",
-                                    fontSize: 12,
-                                    width: 260,
-                                    outline: "none",
-                                    transition: "border-color 0.2s",
                                 }}
                                 onFocus={e => { e.target.style.borderColor = "#457B9D"; e.target.style.boxShadow = "0 0 0 2px #457B9D33"; }}
                                 onBlur={e => { e.target.style.borderColor = search ? "#457B9D" : "#1e3a52"; e.target.style.boxShadow = "none"; }}
@@ -430,6 +568,13 @@ export default function App() {
                                 borderRadius: 6, padding: "6px 14px", cursor: "pointer", fontSize: 12, whiteSpace: "nowrap"
                             }}>✕ Clear all filters</button>
                         )}
+                        {/* Hamburger — visible only on mobile via CSS */}
+                        <button
+                            className="hamburger-btn"
+                            onClick={() => setDrawerOpen(true)}
+                            aria-label="Open navigation menu"
+                            aria-expanded={drawerOpen}
+                        >☰</button>
                     </div>
                 </div>
 
@@ -460,7 +605,7 @@ export default function App() {
             </div>
 
             {/* KPI Cards */}
-            <div data-tour="kpi-cards" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 1, background: "#132030", borderBottom: "1px solid #132030", margin: 0 }}>
+            <div data-tour="kpi-cards" className="kpi-cards">
                 {[
                     { label: "TOTAL STOCKS", val: stats.total, color: "#a8c8e8" },
                     { label: "🔴 RED RISK", val: stats.red, sub: `${stats.total ? Math.round(stats.red / stats.total * 100) : 0}% of total`, color: "#E76F51", click: () => setTierFilter(tierFilter === "Red" ? null : "Red") },
@@ -486,23 +631,24 @@ export default function App() {
             </div>
 
             {/* Tab Nav */}
-            <div style={{ display: "flex", gap: 0, borderBottom: "1px solid #132030", paddingLeft: 28, marginTop: 0, background: "#09131f" }}>
-                {[["overview", "Overview"], ["scatter", "Risk Map"], ["hhi", "HHI Distribution"], ["flags", "Flags"], ["table", "Screener"], ["owners", "Owners"]].map(([id, label]) => (
+            <div className="tab-nav-desktop">
+                {NAV_TABS.map(([id, label]) => (
                     <button key={id} onClick={() => setActiveTab(id)}
                         data-tour={id === "overview" ? "tab-overview" : id === "table" ? "tab-screener" : undefined}
                         style={{
                         background: "none", border: "none", borderBottom: activeTab === id ? "2px solid #457B9D" : "2px solid transparent",
                         color: activeTab === id ? "#a8d8ea" : "#6b8aad", padding: "12px 18px", cursor: "pointer",
-                        fontSize: 12, fontFamily: "DM Mono, monospace", letterSpacing: 1, transition: "color 0.15s"
+                        fontSize: 12, fontFamily: "DM Mono, monospace", letterSpacing: 1, transition: "color 0.15s",
+                        whiteSpace: "nowrap", minHeight: 44,
                     }}>{label}</button>
                 ))}
             </div>
 
-            <div style={{ padding: "20px 28px" }}>
+            <div className="content-area">
 
                 {/* OVERVIEW TAB */}
                 {activeTab === "overview" && (
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
+                    <div className="overview-grid">
                         {/* Tier chart */}
                         <div style={{ background: "#09131f", border: "1px solid #132030", borderRadius: 10, padding: 20 }}>
                             <div style={{ fontSize: 11, color: "#6b8aad", letterSpacing: 2, marginBottom: 4 }}>RISK DISTRIBUTION</div>
@@ -568,7 +714,7 @@ export default function App() {
 
                 {/* RISK MAP TAB */}
                 {activeTab === "scatter" && (
-                    <div style={{ display: "flex", gap: 20, alignItems: "flex-start" }}>
+                    <div className="scatter-layout">
                         <div style={{ flex: 1, background: "#09131f", border: "1px solid #132030", borderRadius: 10, padding: 20 }}>
                             <div style={{ fontSize: 11, color: "#6b8aad", letterSpacing: 2, marginBottom: 4 }}>GOVERNANCE RISK MAP</div>
                             <div style={{ fontSize: 14, color: "#e8f4f8", fontWeight: 600, marginBottom: 4 }}>
@@ -683,7 +829,7 @@ export default function App() {
 
                 {/* SCREENER TABLE TAB */}
                 {activeTab === "table" && (
-                    <div style={{ display: "flex", gap: 20, alignItems: "flex-start" }}>
+                    <div className="screener-layout">
                         <div style={{ flex: 1 }}>
                             <div style={{ background: "#09131f", border: "1px solid #132030", borderRadius: 10, padding: 20 }}>
                                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
