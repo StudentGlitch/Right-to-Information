@@ -1,6 +1,7 @@
 import { useState, useMemo, useCallback, useRef } from "react";
 import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, BarChart, Bar, Cell, Legend, PieChart, Pie } from "recharts";
 import { _OWNERS } from "./owners_data";
+import OnboardingTour from "./OnboardingTour";
 
 // Compact encoded data: [code,issuer,hhi,hl(0=Low,1=Mod,2=High),ens,ff,c1,c3,fr,ss,ip,flags_bits,tier(0=Red,1=Amber,2=Green),th,tht,hc,nd]
 // flags bits: 0=Insider>75%, 1=SingleCP>50%, 2=LowFloat<15%, 3=CritFloat<5%, 4=ZeroForeign
@@ -377,6 +378,7 @@ export default function App() {
     return (
         <div style={{ background: "#060d18", minHeight: "100vh", color: "#e8f4f8", fontFamily: "'DM Sans', sans-serif", padding: "0 0 40px" }}>
             <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+            <OnboardingTour />
 
             {/* Header */}
             <div style={{ background: "linear-gradient(180deg, #0d1e30 0%, #09131f 100%)", borderBottom: "1px solid #132030", padding: "20px 28px 16px" }}>
@@ -387,7 +389,7 @@ export default function App() {
                     </div>
                     <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
                         {/* Global Search — top-right, always visible */}
-                        <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
+                        <div data-tour="search" style={{ position: "relative", display: "flex", alignItems: "center" }}>
                             <span aria-hidden="true" style={{ position: "absolute", left: 10, color: "#457B9D", fontSize: 13, pointerEvents: "none", userSelect: "none" }}>🔍</span>
                             <input
                                 value={search}
@@ -441,7 +443,7 @@ export default function App() {
                 )}
 
                 {/* Preset Screens */}
-                <div style={{ display: "flex", gap: 8, marginTop: 14, flexWrap: "wrap" }}>
+                <div data-tour="presets" style={{ display: "flex", gap: 8, marginTop: 14, flexWrap: "wrap" }}>
                     {PRESETS.map(p => (
                         <button key={p.id} onClick={() => setPresetFilter(presetFilter === p.id ? null : p.id)} style={{
                             background: presetFilter === p.id ? "#1e3a52" : "#0d1e30",
@@ -457,7 +459,7 @@ export default function App() {
             </div>
 
             {/* KPI Cards */}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 1, background: "#132030", borderBottom: "1px solid #132030", margin: 0 }}>
+            <div data-tour="kpi-cards" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 1, background: "#132030", borderBottom: "1px solid #132030", margin: 0 }}>
                 {[
                     { label: "TOTAL STOCKS", val: stats.total, color: "#a8c8e8" },
                     { label: "🔴 RED RISK", val: stats.red, sub: `${stats.total ? Math.round(stats.red / stats.total * 100) : 0}% of total`, color: "#E76F51", click: () => setTierFilter(tierFilter === "Red" ? null : "Red") },
@@ -485,7 +487,9 @@ export default function App() {
             {/* Tab Nav */}
             <div style={{ display: "flex", gap: 0, borderBottom: "1px solid #132030", paddingLeft: 28, marginTop: 0, background: "#09131f" }}>
                 {[["overview", "Overview"], ["scatter", "Risk Map"], ["hhi", "HHI Distribution"], ["flags", "Flags"], ["table", "Screener"], ["owners", "Owners"]].map(([id, label]) => (
-                    <button key={id} onClick={() => setActiveTab(id)} style={{
+                    <button key={id} onClick={() => setActiveTab(id)}
+                        data-tour={id === "overview" ? "tab-overview" : id === "table" ? "tab-screener" : undefined}
+                        style={{
                         background: "none", border: "none", borderBottom: activeTab === id ? "2px solid #457B9D" : "2px solid transparent",
                         color: activeTab === id ? "#a8d8ea" : "#6b8aad", padding: "12px 18px", cursor: "pointer",
                         fontSize: 12, fontFamily: "DM Mono, monospace", letterSpacing: 1, transition: "color 0.15s"
