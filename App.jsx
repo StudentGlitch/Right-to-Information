@@ -380,17 +380,54 @@ export default function App() {
 
             {/* Header */}
             <div style={{ background: "linear-gradient(180deg, #0d1e30 0%, #09131f 100%)", borderBottom: "1px solid #132030", padding: "20px 28px 16px" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 12 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
                     <div>
                         <div style={{ fontSize: 11, letterSpacing: 3, color: "#457B9D", fontFamily: "DM Mono, monospace", marginBottom: 4 }}>IDX · BURSA EFEK INDONESIA · 27 FEB 2026</div>
                         <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700, color: "#e8f4f8" }}>{dynamicTitle}</h1>
                     </div>
-                    {hasFilter && (
-                        <button onClick={clearFilters} style={{
-                            background: "#132030", border: "1px solid #e76f5155", color: "#e76f51",
-                            borderRadius: 6, padding: "6px 14px", cursor: "pointer", fontSize: 12
-                        }}>✕ Clear all filters</button>
-                    )}
+                    <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+                        {/* Global Search — top-right, always visible */}
+                        <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
+                            <span aria-hidden="true" style={{ position: "absolute", left: 10, color: "#457B9D", fontSize: 13, pointerEvents: "none", userSelect: "none" }}>🔍</span>
+                            <input
+                                value={search}
+                                onChange={e => { setSearch(e.target.value); if (e.target.value) setActiveTab("table"); }}
+                                placeholder="Search stock, issuer, or owner…"
+                                aria-label="Search stocks by code, issuer name, or top owner"
+                                title="Search across all stocks by code, issuer name, or top owner"
+                                style={{
+                                    background: "#0d1e30",
+                                    border: `1px solid ${search ? "#457B9D" : "#1e3a52"}`,
+                                    borderRadius: 20,
+                                    color: "#e8f4f8",
+                                    padding: "8px 34px 8px 32px",
+                                    fontSize: 12,
+                                    width: 260,
+                                    outline: "none",
+                                    transition: "border-color 0.2s",
+                                }}
+                                onFocus={e => { e.target.style.borderColor = "#457B9D"; e.target.style.boxShadow = "0 0 0 2px #457B9D33"; }}
+                                onBlur={e => { e.target.style.borderColor = search ? "#457B9D" : "#1e3a52"; e.target.style.boxShadow = "none"; }}
+                            />
+                            {search && (
+                                <button
+                                    onClick={() => setSearch("")}
+                                    title="Clear search"
+                                    style={{
+                                        position: "absolute", right: 10,
+                                        background: "none", border: "none", color: "#6b8aad",
+                                        cursor: "pointer", fontSize: 16, padding: 0, lineHeight: 1,
+                                    }}
+                                >×</button>
+                            )}
+                        </div>
+                        {hasFilter && (
+                            <button onClick={clearFilters} style={{
+                                background: "#132030", border: "1px solid #e76f5155", color: "#e76f51",
+                                borderRadius: 6, padding: "6px 14px", cursor: "pointer", fontSize: 12, whiteSpace: "nowrap"
+                            }}>✕ Clear all filters</button>
+                        )}
+                    </div>
                 </div>
 
                 {/* Active filter pills */}
@@ -649,7 +686,7 @@ export default function App() {
                                         <div style={{ fontSize: 11, color: "#6b8aad", letterSpacing: 2, marginBottom: 2 }}>STOCK SCREENER</div>
                                         <div style={{ fontSize: 13, color: "#e8f4f8" }}>{sorted.length} stocks — cells colour-coded by value</div>
                                     </div>
-                                    <div style={{ display: "flex", gap: 12 }}>
+                                    <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
                                         <select
                                             value={ownerTypeFilter}
                                             onChange={e => setOwnerTypeFilter(e.target.value)}
@@ -662,15 +699,11 @@ export default function App() {
                                             <option value="Company/Institution">Company/Institution</option>
                                             <option value="Individual">Individual</option>
                                         </select>
-                                        <input
-                                            value={search}
-                                            onChange={e => setSearch(e.target.value)}
-                                            placeholder="Search code, name, or owner…"
-                                            style={{
-                                                background: "#060d18", border: "1px solid #1e3a52", borderRadius: 6,
-                                                color: "#e8f4f8", padding: "7px 12px", fontSize: 12, width: 220
-                                            }}
-                                        />
+                                        {search && (
+                                            <span aria-label={`Active search: ${search}`} style={{ fontSize: 11, color: "#457B9D", fontFamily: "DM Mono, monospace" }}>
+                                                <span aria-hidden="true">🔍</span> &ldquo;{search}&rdquo;
+                                            </span>
+                                        )}
                                     </div>
                                 </div>
                                 <div style={{ overflowX: "auto" }}>
