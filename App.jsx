@@ -118,13 +118,13 @@ const API = "http://168.110.206.43:3000";
 
 function StockDetail({ stock, onClose }) {
     if (!stock) return null;
-    const [livePrice, setLivePrice] = React.useState(null);
-    const [prices, setPrices] = React.useState([]);
-    const [financials, setFinancials] = React.useState([]);
-    const [profile, setProfile] = React.useState(null);
-    const [loadingLive, setLoadingLive] = React.useState(true);
+    const [livePrice, setLivePrice] = useState(null);
+    const [prices, setPrices] = useState([]);
+    const [financials, setFinancials] = useState([]);
+    const [profile, setProfile] = useState(null);
+    const [loadingLive, setLoadingLive] = useState(true);
 
-    React.useEffect(() => {
+    useEffect(() => {
         setLivePrice(null); setPrices([]); setFinancials([]); setProfile(null); setLoadingLive(true);
         const t = stock.code;
         Promise.all([
