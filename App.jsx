@@ -114,8 +114,29 @@ function HeatCell({ value, min, max, reverse = false, fmt }) {
     );
 }
 
+const API = "http://168.110.206.43:3000";
+
 function StockDetail({ stock, onClose }) {
     if (!stock) return null;
+    const [livePrice, setLivePrice] = React.useState(null);
+    const [prices, setPrices] = React.useState([]);
+    const [financials, setFinancials] = React.useState([]);
+    const [profile, setProfile] = React.useState(null);
+    const [loadingLive, setLoadingLive] = React.useState(true);
+
+    React.useEffect(() => {
+        setLivePrice(null); setPrices([]); setFinancials([]); setProfile(null); setLoadingLive(true);
+        const t = stock.code;
+        Promise.all([
+            fetch(`${API}/api/stock/${t}/latest`).then(r => r.json()),
+            fetch(`${API}/api/stock/${t}/prices?days=90`).then(r => r.json()),
+            fetch(`${API}/api/stock/${t}/financials`).then(r => r.json()),
+            fetch(`${API}/api/stock/${t}`).then(r => r.json()),
+        ]).then(([lp, px, fin, prof]) => {
+            setLivePrice(lp); setPrices(px); setFinancials(fin); setProfile(prof);
+        }).catch(() => {}).finally(() => setLoadingLive(false));
+    }, [stock.code]);
+
     const metrics = [
         { label: "HHI", val: stock.hhi.toFixed(0), max: 10000, color: HHI_COLOR[stock.hl] },
         { label: "Free Float", val: stock.ff.toFixed(1) + "%", max: 100, pct: stock.ff, color: stock.ff < 5 ? "#d62828" : stock.ff < 15 ? "#e9c46a" : "#2A9D8F" },
@@ -169,6 +190,69 @@ function StockDetail({ stock, onClose }) {
                 <div style={{ marginTop: 12 }}>
                     <div style={{ fontSize: 10, color: "#6b8aad", marginBottom: 5 }}>GOVERNANCE FLAGS</div>
                     <div>{stock.flags.map(f => <FlagPill key={f} flag={f} />)}</div>
+                </div>
+            )}
+
+            {/* Live Price */}
+            <div style={{ marginTop: 14, padding: 10, background: "#060d18", borderRadius: 6 }}>
+                <div style={{ fontSize: 10, color: "#6b8aad", marginBottom: 4 }}>LIVE PRICE</div>
+                {loadingLive ? (
+                    <div style={{ fontSize: 11, color: "#6b8aad" }}>Loading...</div>
+                ) : livePrice ? (
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <span style={{ fontSize: 18, fontWeight: 700, color: "#e8f4f8", fontFamily: "monospace" }}>
+                            Rp {parseFloat(livePrice.price).toLocaleString("id-ID")}
+                        </span>
+                        <span style={{ fontSize: 13, fontWeight: 600, color: parseFloat(livePrice.change_pct) >= 0 ? "#2A9D8F" : "#E76F51", fontFamily: "monospace" }}>
+                            {parseFloat(livePrice.change_pct) >= 0 ? "▲" : "▼"} {Math.abs(livePrice.change_pct)}%
+                        </span>
+                    </div>
+                ) : <div style={{ fontSize: 11, color: "#6b8aad" }}>No price data</div>}
+            </div>
+
+            {/* Price Chart */}
+            {prices.length > 0 && (
+                <div style={{ marginTop: 12 }}>
+                    <div style={{ fontSize: 10, color: "#6b8aad", marginBottom: 6 }}>PRICE (90 DAYS)</div>
+                    <ResponsiveContainer width="100%" height={80}>
+                        <BarChart data={prices} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
+                            <YAxis domain={["auto","auto"]} hide />
+                            <Tooltip
+                                contentStyle={{ background: "#09131f", border: "1px solid #1e3a52", fontSize: 10 }}
+                                formatter={(v) => [`Rp ${parseFloat(v).toLocaleString("id-ID")}`, "Close"]}
+                                labelFormatter={(l) => new Date(l).toLocaleDateString("id-ID")}
+                            />
+                            <Bar dataKey="close_price" fill="#457B9D" radius={[1,1,0,0]} />
+                        </BarChart>
+                    </ResponsiveContainer>
+                </div>
+            )}
+
+            {/* Profile */}
+            {profile && (
+                <div style={{ marginTop: 12, padding: 10, background: "#060d18", borderRadius: 6 }}>
+                    <div style={{ fontSize: 10, color: "#6b8aad", marginBottom: 4 }}>COMPANY INFO</div>
+                    {profile.sector && <div style={{ fontSize: 11, color: "#a8c8e8" }}>📊 {profile.sector}{profile.industry ? ` · ${profile.industry}` : ""}</div>}
+                    {profile.website && <div style={{ fontSize: 11, marginTop: 3 }}><a href={profile.website} target="_blank" rel="noreferrer" style={{ color: "#457B9D" }}>🔗 {profile.website.replace("https://","").replace("http://","")}</a></div>}
+                </div>
+            )}
+
+            {/* Financials */}
+            {financials.length > 0 && (
+                <div style={{ marginTop: 12 }}>
+                    <div style={{ fontSize: 10, color: "#6b8aad", marginBottom: 6 }}>FINANCIALS</div>
+                    <ResponsiveContainer width="100%" height={80}>
+                        <BarChart data={[...financials].reverse()} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
+                            <YAxis hide />
+                            <Tooltip
+                                contentStyle={{ background: "#09131f", border: "1px solid #1e3a52", fontSize: 10 }}
+                                formatter={(v, n) => [v ? `Rp ${(v/1e9).toFixed(1)}B` : "N/A", n]}
+                            />
+                            <Bar dataKey="revenue" name="Revenue" fill="#2A9D8F" radius={[1,1,0,0]} />
+                            <Bar dataKey="net_income" name="Net Income" fill="#457B9D" radius={[1,1,0,0]} />
+                        </BarChart>
+                    </ResponsiveContainer>
+                    <div style={{ fontSize: 10, color: "#6b8aad", marginTop: 4, textAlign: "center" }}>Revenue vs Net Income (in billions IDR)</div>
                 </div>
             )}
         </div>
