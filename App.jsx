@@ -114,7 +114,7 @@ function HeatCell({ value, min, max, reverse = false, fmt }) {
     );
 }
 
-const API = "http://168.110.206.43:3000";
+const API = "https://jkse-api.duckdns.org";
 
 function StockDetail({ stock, onClose }) {
     if (!stock) return null;
