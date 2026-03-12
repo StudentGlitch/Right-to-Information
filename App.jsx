@@ -20,6 +20,16 @@ const RAW = _D.map(r => ({
 
 const TIER_COLOR = { Red: "#E76F51", Amber: "#E9C46A", Green: "#2A9D8F" };
 const HHI_COLOR = { High: "#E76F51", Moderate: "#E9C46A", Low: "#2A9D8F" };
+const OWNER_TYPE_MAP = {
+    ID: { label: "Individual",   color: "#2A9D8F", bg: "#2A9D8F22", border: "#2A9D8F55" },
+    CP: { label: "Corporate",    color: "#E9C46A", bg: "#E9C46A22", border: "#E9C46A55" },
+    IB: { label: "Bank",         color: "#457B9D", bg: "#457B9D22", border: "#457B9D55" },
+    IS: { label: "Insurance",    color: "#A8DADC", bg: "#A8DADC22", border: "#A8DADC55" },
+    SC: { label: "Securities",   color: "#e9843a", bg: "#e9843a22", border: "#e9843a55" },
+    PF: { label: "Pension Fund", color: "#9b72cf", bg: "#9b72cf22", border: "#9b72cf55" },
+    MF: { label: "Mutual Fund",  color: "#c77dff", bg: "#c77dff22", border: "#c77dff55" },
+    OT: { label: "Other",        color: "#8d99ae", bg: "#8d99ae22", border: "#8d99ae55" },
+};
 const FLAG_DEFS = {
     "Insider>75%": "Combined stake of corporate & individual insiders exceeds 75% of shares",
     "SingleCP>50%": "A single corporate entity holds more than 50% of shares",
@@ -414,7 +424,7 @@ export default function App() {
                         grouped[h.n] = { name: h.n, type: h.t, count: 0, stocks: [], totalPct: 0 };
                     }
                     grouped[h.n].count += 1;
-                    grouped[h.n].stocks.push({ code: s.code, pct: h.p, qty: h.q });
+                    grouped[h.n].stocks.push({ code: s.code, issuer: s.issuer, pct: h.p, qty: h.q });
                     grouped[h.n].totalPct += h.p;
                 });
             } else if (s.th) {
@@ -423,7 +433,7 @@ export default function App() {
                     grouped[s.th] = { name: s.th, type: s.tht, count: 0, stocks: [], totalPct: 0 };
                 }
                 grouped[s.th].count += 1;
-                grouped[s.th].stocks.push({ code: s.code, pct: s.c1, qty: null });
+                grouped[s.th].stocks.push({ code: s.code, issuer: s.issuer, pct: s.c1, qty: null });
                 grouped[s.th].totalPct += s.c1;
             }
         });
@@ -441,15 +451,18 @@ export default function App() {
     }, [ownerStats, ownerSearch]);
 
     const ownerTypeData = useMemo(() => {
-        let id = 0, inst = 0;
+        const counts = {};
         filteredOwners.forEach(o => {
-            if (o.type === "ID") id++;
-            else inst++;
+            const key = o.type || "OT";
+            counts[key] = (counts[key] || 0) + 1;
         });
-        return [
-            { name: "Individual", value: id, color: "#2A9D8F" },
-            { name: "Institution", value: inst, color: "#E9C46A" }
-        ];
+        return Object.entries(counts)
+            .filter(([, v]) => v > 0)
+            .map(([k, v]) => ({
+                name: OWNER_TYPE_MAP[k]?.label ?? k,
+                value: v,
+                color: OWNER_TYPE_MAP[k]?.color ?? "#8d99ae"
+            }));
     }, [filteredOwners]);
 
     const topOwnersBarData = useMemo(() => {
@@ -1089,12 +1102,12 @@ export default function App() {
                                                 <td style={{ padding: "14px 8px", color: "#e8f4f8", fontWeight: 600, maxWidth: 240, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={o.name}>{o.name}</td>
                                                 <td style={{ padding: "14px 8px" }}>
                                                     <span style={{
-                                                        background: o.type === "ID" ? "#2A9D8F22" : "#E9C46A22",
-                                                        color: o.type === "ID" ? "#2A9D8F" : "#E9C46A",
-                                                        border: `1px solid ${o.type === "ID" ? "#2A9D8F55" : "#E9C46A55"}`,
+                                                        background: OWNER_TYPE_MAP[o.type]?.bg ?? "#E9C46A22",
+                                                        color: OWNER_TYPE_MAP[o.type]?.color ?? "#E9C46A",
+                                                        border: `1px solid ${OWNER_TYPE_MAP[o.type]?.border ?? "#E9C46A55"}`,
                                                         borderRadius: 4, padding: "3px 8px", fontSize: 9, fontWeight: 500
-                                                    }}>
-                                                        {o.type === "ID" ? "Individual" : "Company"}
+                                                    }} title={OWNER_TYPE_MAP[o.type]?.label ?? o.type}>
+                                                        {OWNER_TYPE_MAP[o.type]?.label ?? o.type}
                                                     </span>
                                                 </td>
                                                 <td style={{ padding: "14px 8px", textAlign: "right", color: "#a8c8e8", fontFamily: "DM Mono, monospace", fontSize: 14 }}>
@@ -1108,11 +1121,14 @@ export default function App() {
                                                         {visibleStocks.map(sym => (
                                                             <span key={sym.code} style={{
                                                                 background: "#132030", color: "#e8f4f8",
-                                                                borderRadius: 4, padding: "3px 8px", fontSize: 10, fontFamily: "DM Mono, monospace",
-                                                                border: "1px solid #1e3a52", display: "flex", alignItems: "center", gap: 6
+                                                                borderRadius: 4, padding: "4px 8px", fontSize: 10, fontFamily: "DM Mono, monospace",
+                                                                border: "1px solid #1e3a52", display: "flex", flexDirection: "column", gap: 2, minWidth: 100
                                                             }}>
-                                                                <b style={{ color: "#a8c8e8" }}>{sym.code}</b>
-                                                                <span style={{ color: sym.pct > 50 ? "#e76f51" : sym.pct > 25 ? "#E9C46A" : "#2A9D8F" }}>{sym.pct.toFixed(2)}%</span>
+                                                                <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                                                                    <b style={{ color: "#a8c8e8" }}>{sym.code}</b>
+                                                                    <span style={{ color: sym.pct > 50 ? "#e76f51" : sym.pct > 25 ? "#E9C46A" : "#2A9D8F" }}>{sym.pct.toFixed(2)}%</span>
+                                                                </span>
+                                                                {sym.issuer && <span style={{ fontSize: 9, color: "#6b8aad", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 140 }} title={sym.issuer}>{sym.issuer}</span>}
                                                             </span>
                                                         ))}
                                                         {!isExpanded && hiddenCount > 0 && (
