@@ -178,12 +178,27 @@ function StockDetail({ stock, onClose }) {
             ))}
 
             <div style={{ marginTop: 14, padding: "10px", background: "#060d18", borderRadius: 6 }}>
-                <div style={{ fontSize: 10, color: "#6b8aad", marginBottom: 4 }}>TOP HOLDER</div>
-                <div style={{ fontSize: 12, color: "#a8c8e8" }}>{stock.th || "—"}</div>
-                <div style={{ display: "flex", gap: 6, marginTop: 4 }}>
-                    <span style={{ fontSize: 10, color: "#6b8aad", background: "#132030", borderRadius: 4, padding: "1px 6px" }}>{stock.tht}</span>
-                    <span style={{ fontSize: 10, color: "#6b8aad" }}>{stock.hc} holder{stock.hc !== 1 ? "s" : ""} total</span>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                    <div style={{ fontSize: 10, color: "#6b8aad", letterSpacing: 1 }}>SHAREHOLDERS</div>
+                    <span style={{ fontSize: 10, color: "#457B9D" }}>{stock.hc} total</span>
                 </div>
+                {(_OWNERS[stock.code] && _OWNERS[stock.code].length > 0
+                    ? _OWNERS[stock.code]
+                    : stock.th ? [{ n: stock.th, t: stock.tht, p: stock.c1 }] : []
+                ).map((h, idx) => (
+                    <div key={idx} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: idx > 0 ? 5 : 0 }}>
+                        <div style={{ fontSize: 11, color: "#a8c8e8", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={h.n}>{h.n || "—"}</div>
+                        <div style={{ display: "flex", gap: 4, alignItems: "center", flexShrink: 0, marginLeft: 8 }}>
+                            <span style={{ fontSize: 9, color: "#6b8aad", background: "#132030", borderRadius: 4, padding: "1px 5px" }}>{h.t}</span>
+                            <span style={{ fontSize: 11, fontFamily: "monospace", fontWeight: 600, color: h.p > 50 ? "#e76f51" : h.p > 25 ? "#E9C46A" : "#2A9D8F" }}>{h.p != null ? h.p.toFixed(1) + "%" : "—"}</span>
+                        </div>
+                    </div>
+                ))}
+                {(_OWNERS[stock.code] ? _OWNERS[stock.code].length : (stock.th ? 1 : 0)) < stock.hc && (
+                    <div style={{ fontSize: 10, color: "#6b8aad", marginTop: 5, fontStyle: "italic" }}>
+                        +{stock.hc - (_OWNERS[stock.code] ? _OWNERS[stock.code].length : (stock.th ? 1 : 0))} more holder{stock.hc - (_OWNERS[stock.code] ? _OWNERS[stock.code].length : (stock.th ? 1 : 0)) !== 1 ? "s" : ""} not disclosed
+                    </div>
+                )}
             </div>
 
             {stock.flags.length > 0 && (
