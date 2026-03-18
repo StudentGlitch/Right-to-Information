@@ -47,6 +47,55 @@ Branch-specific files (feature code, icons, components) were preserved as they d
 
 All branches verified to be **0 commits behind** new main:
 
+---
+
+# Sync Log — v2/next-js-db ← main
+**Operation:** Sync `v2/next-js-db` with `main` (cherry-pick fallback)
+**Date:** 2026-03-18
+**Operator:** GitHub Copilot Agent
+
+## Background
+
+`v2/next-js-db` had **5 unique commits** and was **43 commits behind main**.
+The two branches have **no common ancestor** (divergent histories), so a standard
+`git rebase main` is not applicable. The cherry-pick fallback was used instead.
+
+## Steps Executed
+
+| Phase | Step | Result |
+|-------|------|--------|
+| Audit | Confirmed 43 behind / 5 ahead | ✅ |
+| Backup | Created `backup/v2-before-sync` locally | ✅ |
+| Reset | PR branch reset to `origin/main` HEAD | ✅ |
+| Cherry-pick | `1aabf7f` Initial commit from Create Next App | ✅ (conflicts resolved) |
+| Cherry-pick | `2519b19` migraate to next | ✅ (no conflicts) |
+| Cherry-pick | `6bf33e6` v2 | ✅ (no conflicts) |
+| Cherry-pick | `a613545` Initial plan | ⏭ Skipped (empty commit) |
+| Cherry-pick | `336c21f` Merge PR #11 | ⏭ Skipped (merge commit, content already in `6bf33e6`) |
+
+## Conflict Resolution (during cherry-pick of `1aabf7f`)
+
+| File | Resolution | Reason |
+|------|-----------|--------|
+| `.gitignore` | Kept v2's version (`--theirs`) | v2 commit introduced Next.js-specific ignore rules |
+| `README.md` | Kept main's version (`--ours`) | main has richer project documentation |
+| `package.json` | Kept v2's version (`--theirs`) | v2 is a Next.js project; main's React/Vite deps not needed |
+| `package-lock.json` | Kept v2's version (`--theirs`) | Matches v2's `package.json` |
+
+## Result
+
+| Metric | Value |
+|--------|-------|
+| Commits behind main | 0 ✅ |
+| v2-unique commits preserved on top | 3 ✅ (all meaningful commits; 1 empty + 1 merge skipped) |
+| Backup branch | `backup/v2-before-sync` |
+
+---
+
+## Post-Rebase Verification (Previous Operation)
+
+All branches verified to be **0 commits behind** new main after the original copilot/\* rebase:
+
 | Branch | Behind Main |
 |--------|-------------|
 | `copilot/add-pwa-capabilities-nextjs` | 0 ✅ |
