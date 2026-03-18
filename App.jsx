@@ -60,18 +60,19 @@ const PRESETS = [
 function Tooltip2({ children, text }) {
     const [show, setShow] = useState(false);
     return (
-        <span className="relative inline-block">
+        <span style={{ position: "relative", display: "inline-block" }}>
             <span
                 onMouseEnter={() => setShow(true)}
                 onMouseLeave={() => setShow(false)}
-                style={{ cursor: "help", color: "#6b8aad", fontSize: 11, marginLeft: 4 }}
+                style={{ cursor: "help", color: "var(--color-text-muted)", fontSize: 11, marginLeft: 4 }}
             >ⓘ</span>
             {show && (
                 <span style={{
                     position: "absolute", bottom: "120%", left: "50%", transform: "translateX(-50%)",
-                    background: "#0d1e30", border: "1px solid #1e3a52", borderRadius: 6, padding: "6px 10px",
-                    fontSize: 11, color: "#a8c8e8", whiteSpace: "nowrap", maxWidth: 260, lineHeight: 1.4,
-                    zIndex: 100, boxShadow: "0 4px 20px rgba(0,0,0,0.6)"
+                    background: "var(--color-bg-elevated)", border: "1px solid var(--color-border-strong)",
+                    borderRadius: "var(--radius-md)", padding: "6px 10px",
+                    fontSize: 11, color: "var(--color-text-secondary)", whiteSpace: "nowrap", maxWidth: 260, lineHeight: 1.4,
+                    zIndex: 100, boxShadow: "var(--shadow-lg)"
                 }}>{text}</span>
             )}
         </span>
@@ -99,9 +100,10 @@ function FlagPill({ flag }) {
             {show && FLAG_DEFS[flag] && (
                 <span style={{
                     position: "absolute", bottom: "120%", left: 0,
-                    background: "#0d1e30", border: "1px solid #1e3a52", borderRadius: 6, padding: "6px 10px",
-                    fontSize: 11, color: "#a8c8e8", whiteSpace: "normal", width: 220, lineHeight: 1.5,
-                    zIndex: 100, boxShadow: "0 4px 20px rgba(0,0,0,0.6)"
+                    background: "var(--color-bg-elevated)", border: "1px solid var(--color-border-strong)",
+                    borderRadius: "var(--radius-md)", padding: "6px 10px",
+                    fontSize: 11, color: "var(--color-text-secondary)", whiteSpace: "normal", width: 220, lineHeight: 1.5,
+                    zIndex: 100, boxShadow: "var(--shadow-lg)"
                 }}>{FLAG_DEFS[flag]}</span>
             )}
         </span>
@@ -116,7 +118,7 @@ function HeatCell({ value, min, max, reverse = false, fmt }) {
     const b = Math.round(81 + (1 - heat) * 90);
     return (
         <td style={{
-            padding: "5px 8px", textAlign: "right", fontSize: 11, fontFamily: "monospace",
+            padding: "5px 8px", textAlign: "right", fontSize: 11, fontFamily: "var(--font-mono)",
             color: `rgba(${r},${g},${b},0.95)`,
             background: `rgba(${r},${g},${b},0.08)`,
         }}>
@@ -292,12 +294,12 @@ const CustomScatterTooltip = ({ active, payload }) => {
     const d = payload[0]?.payload;
     if (!d) return null;
     return (
-        <div style={{ background: "#09131f", border: "1px solid #1e3a52", borderRadius: 8, padding: "10px 14px", fontSize: 12 }}>
-            <div style={{ fontWeight: 700, color: "#e8f4f8", fontFamily: "monospace", marginBottom: 4 }}>{d.code}</div>
-            <div style={{ color: "#6b8aad" }}>{d.issuer?.substring(0, 30)}</div>
+        <div style={{ background: "var(--color-bg-surface)", border: "1px solid var(--color-border-strong)", borderRadius: "var(--radius-md)", padding: "10px 14px", fontSize: 12 }}>
+            <div style={{ fontWeight: 700, color: "var(--color-text-primary)", fontFamily: "var(--font-mono)", marginBottom: 4 }}>{d.code}</div>
+            <div style={{ color: "var(--color-text-muted)" }}>{d.issuer?.substring(0, 30)}</div>
             <div style={{ color: TIER_COLOR[d.tier], marginTop: 4 }}>{d.tier} Risk</div>
-            <div style={{ color: "#a8c8e8", marginTop: 2 }}>HHI: <span style={{ fontFamily: "monospace" }}>{d.hhi?.toFixed(0)}</span></div>
-            <div style={{ color: "#a8c8e8" }}>Float: <span style={{ fontFamily: "monospace" }}>{d.ff?.toFixed(1)}%</span></div>
+            <div style={{ color: "var(--color-text-secondary)", marginTop: 2 }}>HHI: <span style={{ fontFamily: "var(--font-mono)" }}>{d.hhi?.toFixed(0)}</span></div>
+            <div style={{ color: "var(--color-text-secondary)" }}>Float: <span style={{ fontFamily: "var(--font-mono)" }}>{d.ff?.toFixed(1)}%</span></div>
         </div>
     );
 };
@@ -315,9 +317,11 @@ function MiniSparkline({ value, tier }) {
     const color = tier === "Green" ? "var(--color-bull)" : tier === "Red" ? "var(--color-bear)" : "var(--color-tier-amber)";
 
     return (
-        <LineChart width={60} height={32} data={data} aria-label="Decorative trend indicator (not real price data)" role="img">
-            <Line type="monotone" dataKey="v" stroke={color} strokeWidth={1.5} dot={false} />
-        </LineChart>
+        <span title="Visual tier indicator (no real price data)" style={{ opacity: 0.65, display: "inline-block", verticalAlign: "middle" }}>
+            <LineChart width={60} height={32} data={data} aria-hidden="true">
+                <Line type="monotone" dataKey="v" stroke={color} strokeWidth={1.5} dot={false} />
+            </LineChart>
+        </span>
     );
 }
 
@@ -844,7 +848,7 @@ export default function App() {
                                                         {c.label}{sortIcon(c.key)}
                                                     </th>
                                                 ))}
-                                                <th className={styles.th}>TREND</th>
+                                                <th className={styles.th} title="Visual tier indicator only">TIER VIZ</th>
                                                 <th className={styles.th}>FLAGS</th>
                                             </tr>
                                         </thead>
