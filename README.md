@@ -11,6 +11,30 @@ My experiment for vibe coding to make a website hub for financial information.
 
 ---
 
+## Getting Started
+
+### Prerequisites
+
+Make sure you have [Git](https://git-scm.com/) and [Node.js](https://nodejs.org/) (v20+) installed on your machine.
+
+### Configure Git (Required Before First Commit)
+
+Before you can commit and push code, tell Git who you are by running the following commands, replacing the placeholders with your own details:
+
+```bash
+git config --global user.name "Your Name"
+git config --global user.email "your.email@example.com"
+```
+
+> **Tip:** Use `--global` to apply settings to all repositories on your machine. Omit it to apply settings only to the current repository.
+
+To verify your configuration:
+
+```bash
+git config --global user.name
+git config --global user.email
+```
+
 ## Local Development
 
 ```bash
@@ -72,3 +96,15 @@ docker compose up --build
 | `VERCEL_TOKEN` | Personal access token from vercel.com/account/tokens |
 | `VERCEL_ORG_ID` | Found in your Vercel team/org settings |
 | `VERCEL_PROJECT_ID` | Found in the Vercel project settings |
+
+## Contributing
+
+1. Fork or clone this repository.
+2. Configure your Git user details as shown in [Getting Started](#getting-started).
+3. Make your changes, then commit and push:
+
+```bash
+git add .
+git commit -m "Your descriptive commit message"
+git push
+```
