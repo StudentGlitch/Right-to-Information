@@ -237,7 +237,7 @@ function StockDetail({ stock, onClose }) {
             {prices.length > 0 && (
                 <div className={styles.detailSection}>
                     <div className={styles.detailSectionLabel}>PRICE (90 DAYS)</div>
-                    <div role="img" aria-label={`90-day price chart for ${stock.code}`}>
+                    <div role="figure" aria-label={`90-day price chart for ${stock.code}`}>
                     <ResponsiveContainer width="100%" height={80}>
                         <AreaChart data={prices} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
                             <defs>
@@ -315,7 +315,7 @@ function MiniSparkline({ value, tier }) {
     const color = tier === "Green" ? "var(--color-bull)" : tier === "Red" ? "var(--color-bear)" : "var(--color-tier-amber)";
 
     return (
-        <LineChart width={60} height={32} data={data}>
+        <LineChart width={60} height={32} data={data} aria-label="Decorative trend indicator (not real price data)" role="img">
             <Line type="monotone" dataKey="v" stroke={color} strokeWidth={1.5} dot={false} />
         </LineChart>
     );
