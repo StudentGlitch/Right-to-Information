@@ -66,7 +66,10 @@ No hardcoded `v2/next-js-db` references found in:
 - `vercel.json` (no vercel.json in v2/next-js-db root)
 - `railway.json` (no railway.json)
 
-**Action required:** Update GitHub repository Settings → Branches → Default branch to `main` if it was set to `v2/next-js-db`.
+**Action required:** 
+1. Update GitHub repository Settings → Branches → Default branch to `main` if it was set to `v2/next-js-db`.
+2. Review and update any branch protection rules that reference `v2/next-js-db` or the old `main`.
+3. Search for any GitHub Actions workflows with hardcoded branch names: `grep -r "v2/next-js-db" .github/`
 
 ---
 

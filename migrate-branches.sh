@@ -92,7 +92,7 @@ if [ -n "$DIFF" ]; then
 fi
 log_ok "Local main reset to v2/next-js-db (diff is empty)"
 
-git push origin main --force-with-lease
+git push origin main --force-with-lease="main:$MAIN_HASH"
 log_ok "Pushed new main to remote"
 
 git fetch origin
@@ -167,7 +167,9 @@ rebase_branch() {
 
         echo "    Conflicts: $CONFLICTED"
         for f in $CONFLICTED; do
-            # Keep v2/next-js-db (ours/base) for shared files
+            # Keep v2/next-js-db (ours/base) for shared files.
+            # Note: during `git rebase`, '--ours' = the rebase target (new main/v2/next-js-db),
+            # not the feature branch. '--theirs' = the feature branch commit being replayed.
             if git show HEAD:"$f" >/dev/null 2>&1; then
                 git checkout --ours "$f" 2>&1
             else
@@ -251,9 +253,13 @@ if [ ${#REBASE_FAILURES[@]} -gt 0 ]; then
 fi
 
 echo ""
-echo "=== Manual step required ==="
-echo "Go to: https://github.com/StudentGlitch/Right-to-Information/settings/branches"
-echo "Confirm default branch is set to 'main' (not 'v2/next-js-db')"
+echo "=== Manual steps required ==="
+echo "1. Go to: https://github.com/StudentGlitch/Right-to-Information/settings/branches"
+echo "   Confirm default branch is set to 'main' (not 'v2/next-js-db')"
+echo "2. Review and update any branch protection rules that reference 'v2/next-js-db' or old 'main'."
+echo "3. Search GitHub Actions workflows for hardcoded branch names:"
+echo "   grep -r 'v2/next-js-db' .github/ && grep -r 'v2/next-js-db' **/*.yml 2>/dev/null"
+echo "   Replace any occurrences with 'main'."
 
 echo ""
 log_ok "Migration complete. See MIGRATION_SUMMARY.md for full details."
