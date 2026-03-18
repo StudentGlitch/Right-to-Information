@@ -210,6 +210,14 @@ export const userQueries = {
       { upsert: true }
     );
   },
+
+  async updatePlan(userId: string, plan: 'free' | 'premium'): Promise<void> {
+    const database = await getDB();
+    await database.collection('users').updateOne(
+      { userId },
+      { $set: { plan, updatedAt: new Date() } }
+    );
+  },
 };
 
 /**

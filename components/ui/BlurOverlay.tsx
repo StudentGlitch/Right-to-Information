@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useRouter } from 'next/navigation';
 import { THEME_COLORS } from '@/lib/constants';
 
 interface BlurOverlayProps {
@@ -14,6 +15,8 @@ export function BlurOverlay({
   isBlurred,
   message = 'Upgrade to Premium to unlock',
 }: BlurOverlayProps): React.ReactElement {
+  const router = useRouter();
+
   if (!isBlurred) {
     return <>{children}</>;
   }
@@ -57,6 +60,24 @@ export function BlurOverlay({
           <div style={{ fontSize: 12, color: THEME_COLORS.textSecondary }}>
             Sign in and upgrade to access all features
           </div>
+          <button
+            type="button"
+            onClick={() => router.push('/upgrade')}
+            style={{
+              marginTop: 12,
+              background: '#2a9d8f',
+              border: 'none',
+              color: '#fff',
+              borderRadius: 8,
+              padding: '10px 24px',
+              fontSize: 13,
+              fontWeight: 700,
+              cursor: 'pointer',
+              fontFamily: 'DM Sans, sans-serif',
+            }}
+          >
+            Upgrade to Premium →
+          </button>
         </div>
       </div>
     </div>

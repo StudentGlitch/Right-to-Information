@@ -127,38 +127,44 @@ export function OverviewTab({ stocks, stats, loading = false }: OverviewTabProps
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
           {[
             {
+              id: 'red',
               icon: '⚠️',
               stat: `${redCount} stocks`,
               desc: `classified as Red risk (${stocks.length ? Math.round((redCount / stocks.length) * 100) : 0}%)`,
             },
             {
+              id: 'float',
               icon: '📉',
               stat: `${stats?.avgFloat?.toFixed(1) || '—'}% avg float`,
               desc: 'average free float percentage',
             },
             {
+              id: 'hhi',
               icon: '📊',
               stat: `HHI avg ${stats?.avgHHI?.toFixed(0) || '—'}`,
               desc: stats?.avgHHI && stats.avgHHI > 2500 ? "deep into 'High concentration' zone" : 'concentration index average',
             },
             {
+              id: 'amber',
               icon: '🟡',
               stat: `${amberCount} stocks`,
               desc: 'moderate concentration (HHI 1500–2500)',
             },
             {
+              id: 'green',
               icon: '🟢',
               stat: `${greenCount} stocks`,
               desc: 'well-distributed ownership (HHI < 1500)',
             },
             {
+              id: 'total',
               icon: '📈',
               stat: `${stocks.length} total`,
               desc: 'securities tracked in the dashboard',
             },
           ].map((f) => (
             <div
-              key={f.stat}
+              key={f.id}
               style={{
                 background: '#060d18',
                 borderRadius: 8,

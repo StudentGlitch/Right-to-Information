@@ -13,7 +13,7 @@ interface KpiCardsProps {
 export function KpiCards({ stats, loading = false, tierFilter, setTierFilter }: KpiCardsProps): React.ReactElement | null {
   if (loading || !stats) {
     return (
-      <div className="kpi-cards">
+      <div className="kpi-cards" data-tour="kpi-cards">
         {[...Array(8)].map((_, i) => (
           <div
             key={i}
@@ -67,7 +67,7 @@ export function KpiCards({ stats, loading = false, tierFilter, setTierFilter }: 
   ];
 
   return (
-    <div className="kpi-cards">
+    <div className="kpi-cards" data-tour="kpi-cards">
       {cards.map((k) => (
         <div
           key={k.label}

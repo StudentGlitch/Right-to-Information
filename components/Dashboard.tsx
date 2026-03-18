@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState, useCallback, useMemo, useRef } from 'react';
+import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { AppHeader, KpiCards, TabBar, MobileDrawer } from '@/components/layout';
+import { OnboardingTour } from '@/components/OnboardingTour';
 import {
   OverviewTab,
   RiskMapTab,
@@ -25,8 +26,32 @@ const NAV_TABS: [string, string][] = [
   ['owners', 'Owners'],
 ];
 
+const TOUR_STORAGE_KEY = 'tourCompleted';
+
 export function Dashboard(): React.ReactElement {
   const [activeTab, setActiveTab] = useState<string>('overview');
+  const [showTour, setShowTour] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const completed = localStorage.getItem(TOUR_STORAGE_KEY) === 'true';
+    if (!completed) setShowTour(true);
+  }, []);
+
+  const handleTourSkip = useCallback((): void => {
+    if (typeof window !== 'undefined') localStorage.setItem(TOUR_STORAGE_KEY, 'true');
+    setShowTour(false);
+  }, []);
+
+  const handleTourComplete = useCallback((): void => {
+    if (typeof window !== 'undefined') localStorage.setItem(TOUR_STORAGE_KEY, 'true');
+    setShowTour(false);
+  }, []);
+
+  const handleReplayTour = useCallback((): void => {
+    if (typeof window !== 'undefined') localStorage.setItem(TOUR_STORAGE_KEY, 'false');
+    setShowTour(true);
+  }, []);
   const [filters, setFilters] = useState<DashboardFilters>({
     tier: undefined,
     searchText: undefined,
@@ -177,6 +202,7 @@ export function Dashboard(): React.ReactElement {
           setHhiFilter={handleHhiFilter}
           flagFilter={filters.flag || null}
           setFlagFilter={handleFlagFilter}
+          onReplayTour={handleReplayTour}
         />
 
         <KpiCards
@@ -278,6 +304,12 @@ export function Dashboard(): React.ReactElement {
           )}
         </div>
       </div>
+
+      <OnboardingTour
+        visible={showTour}
+        onSkip={handleTourSkip}
+        onComplete={handleTourComplete}
+      />
     </>
   );
 }
