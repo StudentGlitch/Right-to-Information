@@ -1,0 +1,117 @@
+:root {
+  /* ── Backgrounds ────────────────────────── */
+  --color-bg-base: #0A0B0D;
+  --color-bg-surface: #111318;
+  --color-bg-elevated: #1A1D23;
+  --color-bg-overlay: #0D0E12;
+  --color-bg-hover: #1E2028;
+
+  /* ── Brand ──────────────────────────────── */
+  --color-accent: #00C805;
+  --color-accent-dim: rgba(0, 200, 5, 0.12);
+  --color-accent-glow: rgba(0, 200, 5, 0.25);
+
+  /* ── Stock Movement ─────────────────────── */
+  --color-bull: #00C805;
+  --color-bull-dim: rgba(0, 200, 5, 0.15);
+  --color-bear: #FF3B30;
+  --color-bear-dim: rgba(255, 59, 48, 0.15);
+  --color-neutral: #8E8E93;
+  --color-neutral-dim: rgba(142, 142, 147, 0.12);
+
+  /* ── Semantic Tier Colors ───────────────── */
+  --color-tier-red: #FF453A;
+  --color-tier-red-dim: rgba(255, 69, 58, 0.15);
+  --color-tier-amber: #FFD60A;
+  --color-tier-amber-dim: rgba(255, 214, 10, 0.15);
+  --color-tier-green: #30D158;
+  --color-tier-green-dim: rgba(48, 209, 88, 0.15);
+
+  /* ── Text ───────────────────────────────── */
+  --color-text-primary: #F5F5F7;
+  --color-text-secondary: #AEAEB2;
+  --color-text-muted: #636366;
+  --color-text-accent: #00C805;
+
+  /* ── Borders ────────────────────────────── */
+  --color-border-base: rgba(255, 255, 255, 0.06);
+  --color-border-subtle: rgba(255, 255, 255, 0.04);
+  --color-border-strong: rgba(255, 255, 255, 0.12);
+
+  /* ── Chart Sequential ───────────────────── */
+  --color-chart-1: #00C805;
+  --color-chart-2: #007AFF;
+  --color-chart-3: #FF9F0A;
+  --color-chart-4: #FF375F;
+  --color-chart-5: #BF5AF2;
+  --color-chart-6: #5AC8FA;
+  --color-chart-7: #FF6B6B;
+  --color-chart-8: #4ECDC4;
+
+  /* ── Sector Colors ──────────────────────── */
+  --color-sector-finance: #007AFF;
+  --color-sector-energy: #FF9F0A;
+  --color-sector-health: #30D158;
+  --color-sector-tech: #BF5AF2;
+  --color-sector-property: #FF6B6B;
+  --color-sector-consumer: #5AC8FA;
+  --color-sector-industrial: #FF9A3C;
+  --color-sector-transport: #4ECDC4;
+
+  /* ── Owner Type Colors ──────────────────── */
+  --color-owner-cp: #007AFF;
+  --color-owner-id: #30D158;
+  --color-owner-ib: #FF9F0A;
+  --color-owner-is: #BF5AF2;
+  --color-owner-ot: #8E8E93;
+
+  /* ── Typography ─────────────────────────── */
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+
+  --text-xs: 0.6875rem;  /* 11px */
+  --text-sm: 0.75rem;    /* 12px */
+  --text-base: 0.875rem; /* 14px */
+  --text-md: 1rem;       /* 16px */
+  --text-lg: 1.125rem;   /* 18px */
+  --text-xl: 1.25rem;    /* 20px */
+  --text-2xl: 1.5rem;    /* 24px */
+  --text-3xl: 1.875rem;  /* 30px */
+
+  --weight-normal: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  /* ── Spacing ────────────────────────────── */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* ── Border Radius ──────────────────────── */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
+
+  /* ── Shadows ────────────────────────────── */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.6);
+  --shadow-glow-accent: 0 0 20px rgba(0, 200, 5, 0.2);
+  --shadow-glow-bear: 0 0 20px rgba(255, 59, 48, 0.2);
+
+  /* ── Transitions ────────────────────────── */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.25s ease;
+  --transition-slow: 0.4s ease;
+  --transition-spring: 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}

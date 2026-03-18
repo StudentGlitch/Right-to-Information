@@ -1,0 +1,44 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+/* ── Numeric utility class ─────────────────── */
+.num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+/* ── Price display ─────────────────────────── */
+.price {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--weight-semibold);
+  letter-spacing: -0.02em;
+}
+
+/* ── Change indicators ─────────────────────── */
+.changePositive {
+  color: var(--color-bull);
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.changeNegative {
+  color: var(--color-bear);
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.changeNeutral {
+  color: var(--color-neutral);
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Ticker symbol ─────────────────────────── */
+.ticker {
+  font-family: var(--font-mono);
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--color-text-primary);
+}

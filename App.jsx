@@ -1,8 +1,9 @@
 import { useState, useMemo, useCallback, useRef, useEffect } from "react";
-import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, BarChart, Bar, Cell, Legend, PieChart, Pie } from "recharts";
+import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, BarChart, Bar, Cell, Legend, PieChart, Pie, LineChart, Line, AreaChart, Area } from "recharts";
 import { _OWNERS } from "./owners_data";
 import OnboardingTour from "./OnboardingTour";
 import { SpeedInsights } from "@vercel/speed-insights/react";
+import styles from "./styles/App.module.scss";
 
 // Compact encoded data: [code,issuer,hhi,hl(0=Low,1=Mod,2=High),ens,ff,c1,c3,fr,ss,ip,flags_bits,tier(0=Red,1=Amber,2=Green),th,tht,hc,nd]
 // flags bits: 0=Insider>75%, 1=SingleCP>50%, 2=LowFloat<15%, 3=CritFloat<5%, 4=ZeroForeign
@@ -59,18 +60,19 @@ const PRESETS = [
 function Tooltip2({ children, text }) {
     const [show, setShow] = useState(false);
     return (
-        <span className="relative inline-block">
+        <span style={{ position: "relative", display: "inline-block" }}>
             <span
                 onMouseEnter={() => setShow(true)}
                 onMouseLeave={() => setShow(false)}
-                style={{ cursor: "help", color: "#6b8aad", fontSize: 11, marginLeft: 4 }}
+                style={{ cursor: "help", color: "var(--color-text-muted)", fontSize: 11, marginLeft: 4 }}
             >ⓘ</span>
             {show && (
                 <span style={{
                     position: "absolute", bottom: "120%", left: "50%", transform: "translateX(-50%)",
-                    background: "#0d1e30", border: "1px solid #1e3a52", borderRadius: 6, padding: "6px 10px",
-                    fontSize: 11, color: "#a8c8e8", whiteSpace: "nowrap", maxWidth: 260, lineHeight: 1.4,
-                    zIndex: 100, boxShadow: "0 4px 20px rgba(0,0,0,0.6)"
+                    background: "var(--color-bg-elevated)", border: "1px solid var(--color-border-strong)",
+                    borderRadius: "var(--radius-md)", padding: "6px 10px",
+                    fontSize: 11, color: "var(--color-text-secondary)", whiteSpace: "nowrap", maxWidth: 260, lineHeight: 1.4,
+                    zIndex: 100, boxShadow: "var(--shadow-lg)"
                 }}>{text}</span>
             )}
         </span>
@@ -98,9 +100,10 @@ function FlagPill({ flag }) {
             {show && FLAG_DEFS[flag] && (
                 <span style={{
                     position: "absolute", bottom: "120%", left: 0,
-                    background: "#0d1e30", border: "1px solid #1e3a52", borderRadius: 6, padding: "6px 10px",
-                    fontSize: 11, color: "#a8c8e8", whiteSpace: "normal", width: 220, lineHeight: 1.5,
-                    zIndex: 100, boxShadow: "0 4px 20px rgba(0,0,0,0.6)"
+                    background: "var(--color-bg-elevated)", border: "1px solid var(--color-border-strong)",
+                    borderRadius: "var(--radius-md)", padding: "6px 10px",
+                    fontSize: 11, color: "var(--color-text-secondary)", whiteSpace: "normal", width: 220, lineHeight: 1.5,
+                    zIndex: 100, boxShadow: "var(--shadow-lg)"
                 }}>{FLAG_DEFS[flag]}</span>
             )}
         </span>
@@ -115,7 +118,7 @@ function HeatCell({ value, min, max, reverse = false, fmt }) {
     const b = Math.round(81 + (1 - heat) * 90);
     return (
         <td style={{
-            padding: "5px 8px", textAlign: "right", fontSize: 11, fontFamily: "monospace",
+            padding: "5px 8px", textAlign: "right", fontSize: 11, fontFamily: "var(--font-mono)",
             color: `rgba(${r},${g},${b},0.95)`,
             background: `rgba(${r},${g},${b},0.08)`,
         }}>
@@ -149,135 +152,137 @@ function StockDetail({ stock, onClose }) {
 
     const metrics = [
         { label: "HHI", val: stock.hhi.toFixed(0), max: 10000, color: HHI_COLOR[stock.hl] },
-        { label: "Free Float", val: stock.ff.toFixed(1) + "%", max: 100, pct: stock.ff, color: stock.ff < 5 ? "#d62828" : stock.ff < 15 ? "#e9c46a" : "#2A9D8F" },
-        { label: "C1 (Top holder)", val: stock.c1.toFixed(1) + "%", max: 100, pct: stock.c1, color: stock.c1 > 75 ? "#e76f51" : "#e9c46a" },
-        { label: "C3 (Top 3)", val: stock.c3.toFixed(1) + "%", max: 100, pct: stock.c3, color: "#e9843a" },
-        { label: "Foreign %", val: stock.fr.toFixed(1) + "%", max: 100, pct: stock.fr, color: "#457B9D" },
-        { label: "ENS", val: stock.ens.toFixed(2), max: 50, pct: Math.min(stock.ens / 50, 1) * 100, color: "#2A9D8F" },
+        { label: "Free Float", val: stock.ff.toFixed(1) + "%", max: 100, pct: stock.ff, color: stock.ff < 5 ? "var(--color-tier-red)" : stock.ff < 15 ? "var(--color-tier-amber)" : "var(--color-tier-green)" },
+        { label: "C1 (Top holder)", val: stock.c1.toFixed(1) + "%", max: 100, pct: stock.c1, color: stock.c1 > 75 ? "var(--color-tier-red)" : "var(--color-tier-amber)" },
+        { label: "C3 (Top 3)", val: stock.c3.toFixed(1) + "%", max: 100, pct: stock.c3, color: "var(--color-chart-3)" },
+        { label: "Foreign %", val: stock.fr.toFixed(1) + "%", max: 100, pct: stock.fr, color: "var(--color-chart-2)" },
+        { label: "ENS", val: stock.ens.toFixed(2), max: 50, pct: Math.min(stock.ens / 50, 1) * 100, color: "var(--color-tier-green)" },
     ];
 
+    const tierClass = stock.tier === "Red" ? styles.tierRed : stock.tier === "Amber" ? styles.tierAmber : styles.tierGreen;
+
     return (
-        <div style={{
-            background: "#09131f", border: "1px solid #1e3a52", borderRadius: 10, padding: 20,
-            minWidth: 280, maxWidth: 320, position: "sticky", top: 20
-        }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
+        <div className={styles.detailPanel}>
+            <div className={styles.detailHeader}>
                 <div>
-                    <div style={{ fontSize: 22, fontWeight: 700, color: "#e8f4f8", fontFamily: "monospace" }}>{stock.code}</div>
-                    <div style={{ fontSize: 12, color: "#6b8aad", marginTop: 2, lineHeight: 1.3 }}>{stock.issuer}</div>
+                    <div className={styles.detailTicker}>{stock.code}</div>
+                    <div className={styles.detailIssuer}>{stock.issuer}</div>
                 </div>
-                <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-                    <span style={{
-                        background: TIER_COLOR[stock.tier] + "33", border: `1px solid ${TIER_COLOR[stock.tier]}66`,
-                        color: TIER_COLOR[stock.tier], borderRadius: 6, padding: "3px 10px", fontSize: 12, fontWeight: 700
-                    }}>{stock.tier}</span>
-                    <button onClick={onClose} style={{ background: "none", border: "none", color: "#6b8aad", cursor: "pointer", fontSize: 18, padding: 0 }}>×</button>
+                <div className={styles.detailBadgeRow}>
+                    <span className={`${styles.tierBadge} ${tierClass}`}>{stock.tier}</span>
+                    <button onClick={onClose} className={styles.detailCloseBtn}>×</button>
                 </div>
             </div>
 
             {metrics.map(m => (
-                <div key={m.label} style={{ marginBottom: 10 }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
-                        <span style={{ fontSize: 11, color: "#6b8aad" }}>{m.label}</span>
-                        <span style={{ fontSize: 11, color: m.color, fontFamily: "monospace", fontWeight: 600 }}>{m.val}</span>
+                <div key={m.label} className={styles.metricRow}>
+                    <div className={styles.metricLabelRow}>
+                        <span className={styles.metricLabel}>{m.label}</span>
+                        <span className={styles.metricValue} style={{ color: m.color }}>{m.val}</span>
                     </div>
-                    <div style={{ background: "#132030", borderRadius: 3, height: 4 }}>
-                        <div style={{ width: (m.pct !== undefined ? m.pct : Math.min(parseFloat(m.val) / m.max * 100, 100)) + "%", background: m.color, height: 4, borderRadius: 3, transition: "width 0.3s" }} />
+                    <div className={styles.metricBar}>
+                        <div className={styles.metricBarFill} style={{
+                            width: (m.pct !== undefined ? m.pct : Math.min(parseFloat(m.val) / m.max * 100, 100)) + "%",
+                            background: m.color
+                        }} />
                     </div>
                 </div>
             ))}
 
-            <div style={{ marginTop: 14, padding: "10px", background: "#060d18", borderRadius: 6 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-                    <div style={{ fontSize: 10, color: "#6b8aad", letterSpacing: 1 }}>SHAREHOLDERS</div>
-                    <span style={{ fontSize: 10, color: "#457B9D" }}>{stock.hc} total</span>
+            <div className={styles.detailSection}>
+                <div className={styles.detailSectionLabel}>
+                    <span>SHAREHOLDERS</span>
+                    <span className={styles.metricLabel}>{stock.hc} total</span>
                 </div>
                 {(_OWNERS[stock.code] && _OWNERS[stock.code].length > 0
                     ? _OWNERS[stock.code]
                     : stock.th ? [{ n: stock.th, t: stock.tht, p: stock.c1 }] : []
                 ).map((h, idx) => (
-                    <div key={idx} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: idx > 0 ? 5 : 0 }}>
-                        <div style={{ fontSize: 11, color: "#a8c8e8", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={h.n}>{h.n || "—"}</div>
-                        <div style={{ display: "flex", gap: 4, alignItems: "center", flexShrink: 0, marginLeft: 8 }}>
-                            <span style={{ fontSize: 9, color: "#6b8aad", background: "#132030", borderRadius: 4, padding: "1px 5px" }}>{h.t}</span>
-                            <span style={{ fontSize: 11, fontFamily: "monospace", fontWeight: 600, color: h.p > 50 ? "#e76f51" : h.p > 25 ? "#E9C46A" : "#2A9D8F" }}>{h.p != null ? h.p.toFixed(1) + "%" : "—"}</span>
+                    <div key={idx} className={styles.holderRow}>
+                        <div className={styles.holderName} title={h.n}>{h.n || "—"}</div>
+                        <div className={styles.holderMeta}>
+                            <span className={styles.holderTypeBadge}>{h.t}</span>
+                            <span className={styles.holderPct} style={{ color: h.p > 50 ? "var(--color-tier-red)" : h.p > 25 ? "var(--color-tier-amber)" : "var(--color-tier-green)" }}>
+                                {h.p != null ? h.p.toFixed(1) + "%" : "—"}
+                            </span>
                         </div>
                     </div>
                 ))}
                 {(_OWNERS[stock.code] ? _OWNERS[stock.code].length : (stock.th ? 1 : 0)) < stock.hc && (
-                    <div style={{ fontSize: 10, color: "#6b8aad", marginTop: 5, fontStyle: "italic" }}>
+                    <div className={styles.holderMore}>
                         +{stock.hc - (_OWNERS[stock.code] ? _OWNERS[stock.code].length : (stock.th ? 1 : 0))} more holder{stock.hc - (_OWNERS[stock.code] ? _OWNERS[stock.code].length : (stock.th ? 1 : 0)) !== 1 ? "s" : ""} not disclosed
                     </div>
                 )}
             </div>
 
             {stock.flags.length > 0 && (
-                <div style={{ marginTop: 12 }}>
-                    <div style={{ fontSize: 10, color: "#6b8aad", marginBottom: 5 }}>GOVERNANCE FLAGS</div>
-                    <div>{stock.flags.map(f => <FlagPill key={f} flag={f} />)}</div>
+                <div className={styles.flagsSection}>
+                    <div className={styles.flagsSectionLabel}>GOVERNANCE FLAGS</div>
+                    <div className={styles.flagsRow}>{stock.flags.map(f => <FlagPill key={f} flag={f} />)}</div>
                 </div>
             )}
 
-            {/* Live Price */}
-            <div style={{ marginTop: 14, padding: 10, background: "#060d18", borderRadius: 6 }}>
-                <div style={{ fontSize: 10, color: "#6b8aad", marginBottom: 4 }}>LIVE PRICE</div>
+            <div className={styles.detailSection}>
+                <div className={styles.detailSectionLabel}>LIVE PRICE</div>
                 {loadingLive ? (
-                    <div style={{ fontSize: 11, color: "#6b8aad" }}>Loading...</div>
+                    <div className={`${styles.skeleton} ${styles.skeletonText}`} />
                 ) : livePrice ? (
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                        <span style={{ fontSize: 18, fontWeight: 700, color: "#e8f4f8", fontFamily: "monospace" }}>
-                            Rp {parseFloat(livePrice.price).toLocaleString("id-ID")}
-                        </span>
-                        <span style={{ fontSize: 13, fontWeight: 600, color: parseFloat(livePrice.change_pct) >= 0 ? "#2A9D8F" : "#E76F51", fontFamily: "monospace" }}>
+                    <div className={styles.livePriceRow}>
+                        <span className={styles.livePrice}>Rp {parseFloat(livePrice.price).toLocaleString("id-ID")}</span>
+                        <span className={`${styles.liveChange} ${parseFloat(livePrice.change_pct) >= 0 ? styles.positiveChange : styles.negativeChange}`}>
                             {parseFloat(livePrice.change_pct) >= 0 ? "▲" : "▼"} {Math.abs(livePrice.change_pct)}%
                         </span>
                     </div>
-                ) : <div style={{ fontSize: 11, color: "#6b8aad" }}>No price data</div>}
+                ) : <div className={styles.metricLabel}>No price data</div>}
             </div>
 
-            {/* Price Chart */}
             {prices.length > 0 && (
-                <div style={{ marginTop: 12 }}>
-                    <div style={{ fontSize: 10, color: "#6b8aad", marginBottom: 6 }}>PRICE (90 DAYS)</div>
+                <div className={styles.detailSection}>
+                    <div className={styles.detailSectionLabel}>PRICE (90 DAYS)</div>
+                    <div role="figure" aria-label={`90-day price chart for ${stock.code}`}>
                     <ResponsiveContainer width="100%" height={80}>
-                        <BarChart data={prices} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
-                            <YAxis domain={["auto","auto"]} hide />
+                        <AreaChart data={prices} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
+                            <defs>
+                                <linearGradient id="priceGradient" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0%" stopColor="var(--color-accent)" stopOpacity={0.3} />
+                                    <stop offset="100%" stopColor="var(--color-accent)" stopOpacity={0} />
+                                </linearGradient>
+                            </defs>
+                            <YAxis domain={["auto", "auto"]} hide />
                             <Tooltip
-                                contentStyle={{ background: "#09131f", border: "1px solid #1e3a52", fontSize: 10 }}
+                                contentStyle={{ background: "var(--color-bg-surface)", border: "1px solid var(--color-border-base)", fontSize: 10, color: "var(--color-text-primary)", borderRadius: "var(--radius-md)" }}
                                 formatter={(v) => [`Rp ${parseFloat(v).toLocaleString("id-ID")}`, "Close"]}
                                 labelFormatter={(l) => new Date(l).toLocaleDateString("id-ID")}
                             />
-                            <Bar dataKey="close_price" fill="#457B9D" radius={[1,1,0,0]} />
-                        </BarChart>
+                            <Area type="monotone" dataKey="close_price" stroke="var(--color-accent)" strokeWidth={1.5} fill="url(#priceGradient)" dot={false} />
+                        </AreaChart>
                     </ResponsiveContainer>
+                    </div>
                 </div>
             )}
 
-            {/* Profile */}
             {profile && (
-                <div style={{ marginTop: 12, padding: 10, background: "#060d18", borderRadius: 6 }}>
-                    <div style={{ fontSize: 10, color: "#6b8aad", marginBottom: 4 }}>COMPANY INFO</div>
-                    {profile.sector && <div style={{ fontSize: 11, color: "#a8c8e8" }}>📊 {profile.sector}{profile.industry ? ` · ${profile.industry}` : ""}</div>}
-                    {profile.website && <div style={{ fontSize: 11, marginTop: 3 }}><a href={profile.website} target="_blank" rel="noreferrer" style={{ color: "#457B9D" }}>🔗 {profile.website.replace("https://","").replace("http://","")}</a></div>}
+                <div className={styles.detailSection}>
+                    <div className={styles.detailSectionLabel}>COMPANY INFO</div>
+                    {profile.sector && <div style={{ fontSize: "var(--text-xs)", color: "var(--color-text-secondary)" }}>📊 {profile.sector}{profile.industry ? ` · ${profile.industry}` : ""}</div>}
+                    {profile.website && <div style={{ marginTop: "var(--space-1)" }}><a href={profile.website} target="_blank" rel="noreferrer" className={styles.profileLink}>🔗 {profile.website.replace("https://", "").replace("http://", "")}</a></div>}
                 </div>
             )}
 
-            {/* Financials */}
             {financials.length > 0 && (
-                <div style={{ marginTop: 12 }}>
-                    <div style={{ fontSize: 10, color: "#6b8aad", marginBottom: 6 }}>FINANCIALS</div>
+                <div className={styles.detailSection}>
+                    <div className={styles.detailSectionLabel}>FINANCIALS</div>
                     <ResponsiveContainer width="100%" height={80}>
                         <BarChart data={[...financials].reverse()} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
                             <YAxis hide />
                             <Tooltip
-                                contentStyle={{ background: "#09131f", border: "1px solid #1e3a52", fontSize: 10 }}
-                                formatter={(v, n) => [v ? `Rp ${(v/1e9).toFixed(1)}B` : "N/A", n]}
+                                contentStyle={{ background: "var(--color-bg-surface)", border: "1px solid var(--color-border-base)", fontSize: 10, borderRadius: "var(--radius-md)" }}
+                                formatter={(v, n) => [v ? `Rp ${(v / 1e9).toFixed(1)}B` : "N/A", n]}
                             />
-                            <Bar dataKey="revenue" name="Revenue" fill="#2A9D8F" radius={[1,1,0,0]} />
-                            <Bar dataKey="net_income" name="Net Income" fill="#457B9D" radius={[1,1,0,0]} />
+                            <Bar dataKey="revenue" name="Revenue" fill="var(--color-chart-1)" radius={[1, 1, 0, 0]} />
+                            <Bar dataKey="net_income" name="Net Income" fill="var(--color-chart-2)" radius={[1, 1, 0, 0]} />
                         </BarChart>
                     </ResponsiveContainer>
-                    <div style={{ fontSize: 10, color: "#6b8aad", marginTop: 4, textAlign: "center" }}>Revenue vs Net Income (in billions IDR)</div>
                 </div>
             )}
         </div>
@@ -289,15 +294,37 @@ const CustomScatterTooltip = ({ active, payload }) => {
     const d = payload[0]?.payload;
     if (!d) return null;
     return (
-        <div style={{ background: "#09131f", border: "1px solid #1e3a52", borderRadius: 8, padding: "10px 14px", fontSize: 12 }}>
-            <div style={{ fontWeight: 700, color: "#e8f4f8", fontFamily: "monospace", marginBottom: 4 }}>{d.code}</div>
-            <div style={{ color: "#6b8aad" }}>{d.issuer?.substring(0, 30)}</div>
+        <div style={{ background: "var(--color-bg-surface)", border: "1px solid var(--color-border-strong)", borderRadius: "var(--radius-md)", padding: "10px 14px", fontSize: 12 }}>
+            <div style={{ fontWeight: 700, color: "var(--color-text-primary)", fontFamily: "var(--font-mono)", marginBottom: 4 }}>{d.code}</div>
+            <div style={{ color: "var(--color-text-muted)" }}>{d.issuer?.substring(0, 30)}</div>
             <div style={{ color: TIER_COLOR[d.tier], marginTop: 4 }}>{d.tier} Risk</div>
-            <div style={{ color: "#a8c8e8", marginTop: 2 }}>HHI: <span style={{ fontFamily: "monospace" }}>{d.hhi?.toFixed(0)}</span></div>
-            <div style={{ color: "#a8c8e8" }}>Float: <span style={{ fontFamily: "monospace" }}>{d.ff?.toFixed(1)}%</span></div>
+            <div style={{ color: "var(--color-text-secondary)", marginTop: 2 }}>HHI: <span style={{ fontFamily: "var(--font-mono)" }}>{d.hhi?.toFixed(0)}</span></div>
+            <div style={{ color: "var(--color-text-secondary)" }}>Float: <span style={{ fontFamily: "var(--font-mono)" }}>{d.ff?.toFixed(1)}%</span></div>
         </div>
     );
 };
+
+function MiniSparkline({ value, tier }) {
+    const data = useMemo(() => {
+        const seed = value || 50;
+        // Generates a pseudo-random but deterministic wave shape seeded by the metric value,
+        // giving each stock a unique-looking trend line without requiring real historical data.
+        return Array.from({ length: 12 }, (_, i) => ({
+            v: Math.max(0, seed + (Math.sin(i * 0.8 + seed) * 8) + (Math.cos(i * 0.5) * 4))
+        }));
+    }, [value]);
+
+    const color = tier === "Green" ? "var(--color-bull)" : tier === "Red" ? "var(--color-bear)" : "var(--color-tier-amber)";
+
+    return (
+        <span title="Visual tier indicator (no real price data)" style={{ opacity: 0.65, display: "inline-block", verticalAlign: "middle" }}>
+            <LineChart width={60} height={32} data={data} aria-hidden="true">
+                <Line type="monotone" dataKey="v" stroke={color} strokeWidth={1.5} dot={false} />
+            </LineChart>
+        </span>
+    );
+}
+
 
 export default function App() {
     const [tierFilter, setTierFilter] = useState(null);
@@ -509,129 +536,17 @@ export default function App() {
     const NAV_TABS = [["overview", "Overview"], ["scatter", "Risk Map"], ["hhi", "HHI"], ["flags", "Flags"], ["table", "Screener"], ["owners", "Owners"]];
 
     return (
-        <div className="app-root" style={{ background: "#060d18", minHeight: "100vh", color: "#e8f4f8", fontFamily: "'DM Sans', sans-serif", padding: "0 0 40px" }}>
-            <style>{`
-                /* ── Mobile-first responsive system ──────────────────────────── */
-                /* Reference breakpoints (md=768px is the primary split point):   */
-                /* xs: 320px | sm: 375px | md: 768px | lg: 1024px | xl: 1440px   */
-                .app-root { overflow-x: hidden; }
-
-                /* Header */
-                .app-header { padding: clamp(12px, 4vw, 20px) clamp(12px, 4vw, 28px) 14px; }
-                .header-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
-                .header-title { font-size: clamp(0.875rem, 5vw, 1.375rem); margin: 0; font-weight: 700; color: #e8f4f8; }
-                .header-eyebrow { font-size: clamp(0.625rem, 2.5vw, 0.6875rem); letter-spacing: 3px; color: #457B9D; font-family: "DM Mono", monospace; margin-bottom: 4px; }
-                .header-right { display: flex; gap: 10px; align-items: center; }
-
-                /* Search */
-                .search-wrap { position: relative; display: flex; align-items: center; }
-                .search-input { background: #0d1e30; border-radius: 20px; color: #e8f4f8; padding: 8px 34px 8px 32px; font-size: 0.75rem; outline: none; transition: border-color 0.2s; width: clamp(140px, 40vw, 260px); }
-
-                /* Hamburger button — hidden on desktop, shown on mobile */
-                .hamburger-btn {
-                    display: none;
-                    align-items: center; justify-content: center;
-                    background: none; border: 1px solid #1e3a52;
-                    color: #a8c8e8; border-radius: 6px;
-                    width: 44px; height: 44px;
-                    font-size: 1.25rem; cursor: pointer; flex-shrink: 0;
-                }
-
-                /* Tab nav — desktop horizontal row */
-                .tab-nav-desktop {
-                    display: flex; gap: 0;
-                    border-bottom: 1px solid #132030;
-                    padding-left: clamp(12px, 4vw, 28px);
-                    background: #09131f;
-                    overflow-x: auto;
-                    -webkit-overflow-scrolling: touch;
-                    scrollbar-width: none;
-                }
-                .tab-nav-desktop::-webkit-scrollbar { display: none; }
-
-                /* Content area */
-                .content-area { padding: clamp(12px, 4vw, 20px) clamp(12px, 4vw, 28px); }
-
-                /* Overview two-column grid → single column on mobile */
-                .overview-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
-
-                /* Side-by-side layouts → stack on mobile */
-                .scatter-layout { display: flex; flex-direction: column; gap: 16px; align-items: stretch; }
-                .screener-layout { display: flex; flex-direction: column; gap: 16px; align-items: stretch; }
-
-                /* Mobile drawer overlay */
-                .drawer-overlay {
-                    display: none;
-                    position: fixed; inset: 0; z-index: 200;
-                    background: rgba(0,0,0,0.6);
-                }
-                .drawer-overlay.open { display: block; }
-                .mobile-drawer {
-                    position: fixed; top: 0; left: 0; bottom: 0; z-index: 201;
-                    width: min(280px, 85vw);
-                    background: #0d1e30; border-right: 1px solid #1e3a52;
-                    padding: 24px 0;
-                    transform: translateX(-100%);
-                    transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
-                    display: flex; flex-direction: column;
-                    overflow-y: auto;
-                }
-                .mobile-drawer.open { transform: translateX(0); }
-                .drawer-close {
-                    align-self: flex-end;
-                    margin-right: 20px; margin-bottom: 16px;
-                    background: none; border: 1px solid #1e3a52;
-                    color: #a8c8e8; border-radius: 6px;
-                    width: 44px; height: 44px;
-                    font-size: 1.25rem; cursor: pointer;
-                    display: flex; align-items: center; justify-content: center;
-                }
-                .drawer-nav-btn {
-                    background: none; border: none; text-align: left;
-                    padding: 14px 24px; font-size: 0.9375rem;
-                    font-family: "DM Mono", monospace; letter-spacing: 0.5px;
-                    cursor: pointer; transition: background 0.15s;
-                    min-height: 52px; display: flex; align-items: center;
-                    border-left: 3px solid transparent;
-                }
-                .drawer-nav-btn.active {
-                    color: #a8d8ea;
-                    background: #132030;
-                    border-left-color: #457B9D;
-                }
-                .drawer-nav-btn:not(.active) { color: #6b8aad; }
-                .drawer-nav-btn:hover:not(.active) { background: #09131f; }
-
-                /* ── min-width (tablet and up) overrides ───────────────────── */
-                @media (min-width: 768px) {
-                    .overview-grid { grid-template-columns: 1fr 1fr; }
-                    .scatter-layout { flex-direction: row; align-items: flex-start; }
-                    .screener-layout { flex-direction: row; align-items: flex-start; }
-                    .hamburger-btn { display: none !important; }
-                    .tab-nav-desktop { overflow-x: visible; }
-                }
-
-                /* KPI cards — base rule; mobile override below forces 2 columns */
-                .kpi-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1px; background: #132030; border-bottom: 1px solid #132030; }
-
-                /* ── max-width mobile overrides (< 768px) ───────────────────── */
-                @media (max-width: 767px) {
-                    .hamburger-btn { display: flex; }
-                    .tab-nav-desktop { display: none; }
-                    .kpi-cards { grid-template-columns: repeat(2, 1fr); }
-                }
-            `}</style>
-            <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+        <div className={styles.appRoot}>
             <OnboardingTour />
 
             {/* Mobile Nav Drawer */}
-            <div className={`drawer-overlay${drawerOpen ? " open" : ""}`} aria-hidden="true" />
-            <nav ref={drawerRef} className={`mobile-drawer${drawerOpen ? " open" : ""}`} aria-label="Mobile navigation">
-                <button className="drawer-close" onClick={() => setDrawerOpen(false)} aria-label="Close navigation">✕</button>
+            <div className={`${styles.drawerOverlay}${drawerOpen ? " " + styles.drawerOverlayOpen : ""}`} aria-hidden="true" />
+            <nav ref={drawerRef} className={`${styles.mobileDrawer}${drawerOpen ? " " + styles.mobileDrawerOpen : ""}`} aria-label="Mobile navigation">
+                <button className={styles.drawerClose} onClick={() => setDrawerOpen(false)} aria-label="Close navigation">✕</button>
                 {NAV_TABS.map(([id, label]) => (
                     <button
                         key={id}
-                        className={`drawer-nav-btn${activeTab === id ? " active" : ""}`}
+                        className={`${styles.drawerNavBtn}${activeTab === id ? " " + styles.drawerNavBtnActive : ""}`}
                         onClick={() => { setActiveTab(id); setDrawerOpen(false); }}
                         aria-current={activeTab === id ? "page" : undefined}
                     >{label}</button>
@@ -639,77 +554,44 @@ export default function App() {
             </nav>
 
             {/* Header */}
-            <div className="app-header" style={{ background: "linear-gradient(180deg, #0d1e30 0%, #09131f 100%)", borderBottom: "1px solid #132030" }}>
-                <div className="header-row">
+            <div className={styles.appHeaderSection}>
+                <div className={styles.headerRow}>
                     <div>
-                        <div className="header-eyebrow">IDX · BURSA EFEK INDONESIA · 27 FEB 2026</div>
-                        <h1 className="header-title">{dynamicTitle}</h1>
+                        <div className={styles.eyebrow}>IDX · BURSA EFEK INDONESIA · 27 FEB 2026</div>
+                        <h1 className={styles.mainTitle}>{dynamicTitle}</h1>
                     </div>
-                    <div className="header-right">
-                        {/* Global Search — top-right, always visible */}
-                        <div data-tour="search" className="search-wrap">
-                            <span aria-hidden="true" style={{ position: "absolute", left: 10, color: "#457B9D", fontSize: 13, pointerEvents: "none", userSelect: "none" }}>🔍</span>
+                    <div className={styles.headerRight}>
+                        <div data-tour="search" className={styles.searchWrap}>
+                            <span aria-hidden="true" className={styles.searchIcon}>🔍</span>
                             <input
                                 value={search}
                                 onChange={e => { setSearch(e.target.value); if (e.target.value) setActiveTab("table"); }}
                                 placeholder="Search stock, issuer, or owner…"
                                 aria-label="Search stocks by code, issuer name, or top owner"
-                                title="Search across all stocks by code, issuer name, or top owner"
-                                className="search-input"
-                                style={{
-                                    border: `1px solid ${search ? "#457B9D" : "#1e3a52"}`,
-                                }}
-                                onFocus={e => { e.target.style.borderColor = "#457B9D"; e.target.style.boxShadow = "0 0 0 2px #457B9D33"; }}
-                                onBlur={e => { e.target.style.borderColor = search ? "#457B9D" : "#1e3a52"; e.target.style.boxShadow = "none"; }}
+                                className={styles.searchInput}
                             />
-                            {search && (
-                                <button
-                                    onClick={() => setSearch("")}
-                                    title="Clear search"
-                                    style={{
-                                        position: "absolute", right: 10,
-                                        background: "none", border: "none", color: "#6b8aad",
-                                        cursor: "pointer", fontSize: 16, padding: 0, lineHeight: 1,
-                                    }}
-                                >×</button>
-                            )}
+                            {search && <button onClick={() => setSearch("")} className={styles.searchClear} title="Clear search">×</button>}
                         </div>
                         {hasFilter && (
-                            <button onClick={clearFilters} style={{
-                                background: "#132030", border: "1px solid #e76f5155", color: "#e76f51",
-                                borderRadius: 6, padding: "6px 14px", cursor: "pointer", fontSize: 12, whiteSpace: "nowrap"
-                            }}>✕ Clear all filters</button>
+                            <button onClick={clearFilters} className={styles.clearFiltersBtn}>✕ Clear all filters</button>
                         )}
-                        {/* Hamburger — visible only on mobile via CSS */}
-                        <button
-                            className="hamburger-btn"
-                            onClick={() => setDrawerOpen(true)}
-                            aria-label="Open navigation menu"
-                            aria-expanded={drawerOpen}
-                        >☰</button>
+                        <button className={styles.hamburgerBtn} onClick={() => setDrawerOpen(true)} aria-label="Open navigation menu" aria-expanded={drawerOpen}>☰</button>
                     </div>
                 </div>
 
-                {/* Active filter pills */}
                 {hasFilter && (
-                    <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 10 }}>
-                        {tierFilter && <span style={{ background: TIER_COLOR[tierFilter] + "33", border: `1px solid ${TIER_COLOR[tierFilter]}`, borderRadius: 20, padding: "2px 10px", fontSize: 11, color: TIER_COLOR[tierFilter], cursor: "pointer" }} onClick={() => setTierFilter(null)}>Tier: {tierFilter} ×</span>}
-                        {hhiFilter && <span style={{ background: "#e9c46a33", border: "1px solid #e9c46a", borderRadius: 20, padding: "2px 10px", fontSize: 11, color: "#e9c46a", cursor: "pointer" }} onClick={() => setHhiFilter(null)}>HHI: {hhiFilter} ×</span>}
-                        {flagFilter && <span style={{ background: "#e76f5133", border: "1px solid #e76f51", borderRadius: 20, padding: "2px 10px", fontSize: 11, color: "#e76f51", cursor: "pointer" }} onClick={() => setFlagFilter(null)}>{flagFilter} ×</span>}
-                        {presetFilter && <span style={{ background: "#457B9D33", border: "1px solid #457B9D", borderRadius: 20, padding: "2px 10px", fontSize: 11, color: "#457B9D", cursor: "pointer" }} onClick={() => setPresetFilter(null)}>{PRESETS.find(p => p.id === presetFilter)?.label} ×</span>}
+                    <div className={styles.filterPills}>
+                        {tierFilter && <span className={styles.filterPill} onClick={() => setTierFilter(null)}>Tier: {tierFilter} ×</span>}
+                        {hhiFilter && <span className={styles.filterPill} onClick={() => setHhiFilter(null)}>HHI: {hhiFilter} ×</span>}
+                        {flagFilter && <span className={styles.filterPill} onClick={() => setFlagFilter(null)}>{flagFilter} ×</span>}
+                        {presetFilter && <span className={styles.filterPill} onClick={() => setPresetFilter(null)}>{PRESETS.find(p => p.id === presetFilter)?.label} ×</span>}
                     </div>
                 )}
 
-                {/* Preset Screens */}
-                <div data-tour="presets" style={{ display: "flex", gap: 8, marginTop: 14, flexWrap: "wrap" }}>
+                <div data-tour="presets" className={styles.presets}>
                     {PRESETS.map(p => (
-                        <button key={p.id} onClick={() => setPresetFilter(presetFilter === p.id ? null : p.id)} style={{
-                            background: presetFilter === p.id ? "#1e3a52" : "#0d1e30",
-                            border: `1px solid ${presetFilter === p.id ? "#457B9D" : "#1e3a52"}`,
-                            color: presetFilter === p.id ? "#a8d8ea" : "#6b8aad",
-                            borderRadius: 6, padding: "5px 12px", cursor: "pointer", fontSize: 11,
-                            transition: "all 0.15s"
-                        }}>
+                        <button key={p.id} onClick={() => setPresetFilter(presetFilter === p.id ? null : p.id)}
+                            className={`${styles.presetBtn}${presetFilter === p.id ? " " + styles.presetBtnActive : ""}`}>
                             {p.label}
                         </button>
                     ))}
@@ -717,94 +599,87 @@ export default function App() {
             </div>
 
             {/* KPI Cards */}
-            <div data-tour="kpi-cards" className="kpi-cards">
+            <div data-tour="kpi-cards" className={styles.kpiCards}>
                 {[
-                    { label: "TOTAL STOCKS", val: stats.total, color: "#a8c8e8" },
-                    { label: "🔴 RED RISK", val: stats.red, sub: `${stats.total ? Math.round(stats.red / stats.total * 100) : 0}% of total`, color: "#E76F51", click: () => setTierFilter(tierFilter === "Red" ? null : "Red") },
-                    { label: "🟡 AMBER RISK", val: stats.amber, color: "#E9C46A", click: () => setTierFilter(tierFilter === "Amber" ? null : "Amber") },
-                    { label: "🟢 GREEN RISK", val: stats.green, color: "#2A9D8F", click: () => setTierFilter(tierFilter === "Green" ? null : "Green") },
-                    { label: "AVG HHI", val: stats.avgHHI?.toFixed(0), sub: "High conc. >2,500", color: stats.avgHHI > 2500 ? "#E76F51" : "#E9C46A" },
-                    { label: "AVG FREE FLOAT", val: stats.avgFF?.toFixed(1) + "%", sub: "IDX min: 15%", color: stats.avgFF < 15 ? "#E76F51" : "#2A9D8F" },
-                    { label: "FLOAT < 15%", val: stats.lowFloat, sub: `${stats.total ? Math.round(stats.lowFloat / stats.total * 100) : 0}% of filtered`, color: "#E9C46A" },
-                    { label: "HIGH HHI", val: stats.highConc, sub: "HHI > 2,500", color: "#E76F51" },
+                    { label: "TOTAL STOCKS", val: stats.total, color: "var(--color-text-secondary)" },
+                    { label: "🔴 RED RISK", val: stats.red, sub: `${stats.total ? Math.round(stats.red / stats.total * 100) : 0}% of total`, color: "var(--color-tier-red)", click: () => setTierFilter(tierFilter === "Red" ? null : "Red") },
+                    { label: "🟡 AMBER RISK", val: stats.amber, color: "var(--color-tier-amber)", click: () => setTierFilter(tierFilter === "Amber" ? null : "Amber") },
+                    { label: "🟢 GREEN RISK", val: stats.green, color: "var(--color-tier-green)", click: () => setTierFilter(tierFilter === "Green" ? null : "Green") },
+                    { label: "AVG HHI", val: stats.avgHHI?.toFixed(0), sub: "High conc. >2,500", color: stats.avgHHI > 2500 ? "var(--color-tier-red)" : "var(--color-tier-amber)" },
+                    { label: "AVG FREE FLOAT", val: stats.avgFF?.toFixed(1) + "%", sub: "IDX min: 15%", color: stats.avgFF < 15 ? "var(--color-tier-red)" : "var(--color-tier-green)" },
+                    { label: "FLOAT < 15%", val: stats.lowFloat, sub: `${stats.total ? Math.round(stats.lowFloat / stats.total * 100) : 0}% of filtered`, color: "var(--color-tier-amber)" },
+                    { label: "HIGH HHI", val: stats.highConc, sub: "HHI > 2,500", color: "var(--color-tier-red)" },
                 ].map(k => (
-                    <div key={k.label} onClick={k.click} style={{
-                        background: "#09131f", padding: "14px 18px", cursor: k.click ? "pointer" : "default",
-                        borderRight: "1px solid #132030", transition: "background 0.15s",
-                    }}
-                        onMouseEnter={e => k.click && (e.currentTarget.style.background = "#0d1e30")}
-                        onMouseLeave={e => k.click && (e.currentTarget.style.background = "#09131f")}
-                    >
-                        <div style={{ fontSize: 9, letterSpacing: 2, color: "#457B9D", marginBottom: 4 }}>{k.label}</div>
-                        <div style={{ fontSize: 24, fontWeight: 700, fontFamily: "DM Mono, monospace", color: k.color }}>{k.val}</div>
-                        {k.sub && <div style={{ fontSize: 10, color: "#6b8aad", marginTop: 2 }}>{k.sub}</div>}
+                    <div key={k.label} onClick={k.click}
+                        className={`${styles.kpiCard}${k.click ? " " + styles.kpiCardClickable : ""}`}>
+                        <div className={styles.kpiLabel}>{k.label}</div>
+                        <div className={styles.kpiValue} style={{ color: k.color }}>{k.val}</div>
+                        {k.sub && <div className={styles.kpiSub}>{k.sub}</div>}
                     </div>
                 ))}
             </div>
 
-            {/* Tab Nav */}
-            <div className="tab-nav-desktop">
+            {/* Tab Nav Desktop */}
+            <div className={styles.tabNavDesktop}>
                 {NAV_TABS.map(([id, label]) => (
                     <button key={id} onClick={() => setActiveTab(id)}
                         data-tour={id === "overview" ? "tab-overview" : id === "table" ? "tab-screener" : undefined}
-                        style={{
-                        background: "none", border: "none", borderBottom: activeTab === id ? "2px solid #457B9D" : "2px solid transparent",
-                        color: activeTab === id ? "#a8d8ea" : "#6b8aad", padding: "12px 18px", cursor: "pointer",
-                        fontSize: 12, fontFamily: "DM Mono, monospace", letterSpacing: 1, transition: "color 0.15s",
-                        whiteSpace: "nowrap", minHeight: 44,
-                    }}>{label}</button>
+                        className={`${styles.tabBtn}${activeTab === id ? " " + styles.tabBtnActive : ""}`}>
+                        {label}
+                    </button>
                 ))}
             </div>
 
-            <div className="content-area">
+            <div className={styles.contentArea}>
 
                 {/* OVERVIEW TAB */}
                 {activeTab === "overview" && (
-                    <div className="overview-grid">
-                        {/* Tier chart */}
-                        <div style={{ background: "#09131f", border: "1px solid #132030", borderRadius: 10, padding: 20 }}>
-                            <div style={{ fontSize: 11, color: "#6b8aad", letterSpacing: 2, marginBottom: 4 }}>RISK DISTRIBUTION</div>
-                            <div style={{ fontSize: 14, color: "#e8f4f8", fontWeight: 600, marginBottom: 16 }}>
+                    <div className={styles.overviewGrid}>
+                        <div className={styles.card}>
+                            <div className={styles.cardEyebrow}>RISK DISTRIBUTION</div>
+                            <div className={styles.cardTitle}>
                                 {stats.red > stats.green + stats.amber ? "Most Stocks Have Governance Concerns" : "Risk Spread Across Tiers"}
                             </div>
-                            <ResponsiveContainer width="100%" height={220}>
-                                <BarChart data={tierDist} onClick={d => d?.activePayload?.[0] && setTierFilter(tierFilter === d.activePayload[0].payload.name ? null : d.activePayload[0].payload.name)}>
-                                    <CartesianGrid strokeDasharray="3 3" stroke="#132030" />
-                                    <XAxis dataKey="name" tick={{ fill: "#6b8aad", fontSize: 11 }} />
-                                    <YAxis tick={{ fill: "#6b8aad", fontSize: 11 }} />
-                                    <Tooltip contentStyle={{ background: "#09131f", border: "1px solid #1e3a52", borderRadius: 6 }} labelStyle={{ color: "#e8f4f8" }} />
-                                    <Bar dataKey="value" radius={[4, 4, 0, 0]} cursor="pointer">
-                                        {tierDist.map(d => <Cell key={d.name} fill={d.color} />)}
-                                    </Bar>
-                                </BarChart>
-                            </ResponsiveContainer>
-                            <div style={{ fontSize: 10, color: "#457B9D", marginTop: 8 }}>↑ Click bars to filter</div>
+                            <div className={styles.chartWrap}>
+                                <ResponsiveContainer width="100%" height={220}>
+                                    <BarChart data={tierDist} onClick={d => d?.activePayload?.[0] && setTierFilter(tierFilter === d.activePayload[0].payload.name ? null : d.activePayload[0].payload.name)}>
+                                        <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border-base)" />
+                                        <XAxis dataKey="name" tick={{ fill: "var(--color-text-muted)", fontSize: 11 }} />
+                                        <YAxis tick={{ fill: "var(--color-text-muted)", fontSize: 11 }} />
+                                        <Tooltip contentStyle={{ background: "var(--color-bg-surface)", border: "1px solid var(--color-border-base)", borderRadius: "var(--radius-md)" }} labelStyle={{ color: "var(--color-text-primary)" }} />
+                                        <Bar dataKey="value" radius={[4, 4, 0, 0]} cursor="pointer">
+                                            {tierDist.map(d => <Cell key={d.name} fill={d.color} />)}
+                                        </Bar>
+                                    </BarChart>
+                                </ResponsiveContainer>
+                            </div>
+                            <div className={styles.cardHint}>↑ Click bars to filter</div>
                         </div>
 
-                        {/* HHI Overview */}
-                        <div style={{ background: "#09131f", border: "1px solid #132030", borderRadius: 10, padding: 20 }}>
-                            <div style={{ fontSize: 11, color: "#6b8aad", letterSpacing: 2, marginBottom: 4 }}>HHI CONCENTRATION<Tooltip2 text={METRIC_DEFS.HHI} /></div>
-                            <div style={{ fontSize: 14, color: "#e8f4f8", fontWeight: 600, marginBottom: 16 }}>
+                        <div className={styles.card}>
+                            <div className={styles.cardEyebrow}>HHI CONCENTRATION<Tooltip2 text={METRIC_DEFS.HHI} /></div>
+                            <div className={styles.cardTitle}>
                                 {stats.highConc > (stats.total / 2) ? `${Math.round(stats.highConc / stats.total * 100)}% of Stocks Are Highly Concentrated` : "Concentration Is Spread Across Zones"}
                             </div>
-                            <ResponsiveContainer width="100%" height={220}>
-                                <BarChart data={hhiHist} onClick={d => { if (d?.activePayload) { const hl = d.activePayload[0]?.payload; if (hl) setHhiFilter(hhiFilter === "High" ? null : "High"); } }}>
-                                    <CartesianGrid strokeDasharray="3 3" stroke="#132030" />
-                                    <XAxis dataKey="range" tick={{ fill: "#6b8aad", fontSize: 9 }} />
-                                    <YAxis tick={{ fill: "#6b8aad", fontSize: 11 }} />
-                                    <Tooltip contentStyle={{ background: "#09131f", border: "1px solid #1e3a52", borderRadius: 6 }} labelStyle={{ color: "#e8f4f8" }} />
-                                    <Bar dataKey="Low" stackId="a" fill="#2A9D8F" />
-                                    <Bar dataKey="Moderate" stackId="a" fill="#E9C46A" />
-                                    <Bar dataKey="High" stackId="a" fill="#E76F51" radius={[4, 4, 0, 0]} />
-                                </BarChart>
-                            </ResponsiveContainer>
-                            <div style={{ fontSize: 10, color: "#457B9D", marginTop: 8 }}>↑ Stacked by HHI zone</div>
+                            <div className={styles.chartWrap}>
+                                <ResponsiveContainer width="100%" height={220}>
+                                    <BarChart data={hhiHist} onClick={d => { if (d?.activePayload) { const hl = d.activePayload[0]?.payload; if (hl) setHhiFilter(hhiFilter === "High" ? null : "High"); } }}>
+                                        <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border-base)" />
+                                        <XAxis dataKey="range" tick={{ fill: "var(--color-text-muted)", fontSize: 9 }} />
+                                        <YAxis tick={{ fill: "var(--color-text-muted)", fontSize: 11 }} />
+                                        <Tooltip contentStyle={{ background: "var(--color-bg-surface)", border: "1px solid var(--color-border-base)", borderRadius: "var(--radius-md)" }} labelStyle={{ color: "var(--color-text-primary)" }} />
+                                        <Bar dataKey="Low" stackId="a" fill="var(--color-tier-green)" />
+                                        <Bar dataKey="Moderate" stackId="a" fill="var(--color-tier-amber)" />
+                                        <Bar dataKey="High" stackId="a" fill="var(--color-tier-red)" radius={[4, 4, 0, 0]} />
+                                    </BarChart>
+                                </ResponsiveContainer>
+                            </div>
+                            <div className={styles.cardHint}>↑ Stacked by HHI zone</div>
                         </div>
 
-                        {/* Findings */}
-                        <div style={{ background: "#09131f", border: "1px solid #132030", borderRadius: 10, padding: 20, gridColumn: "1 / -1" }}>
-                            <div style={{ fontSize: 11, color: "#6b8aad", letterSpacing: 2, marginBottom: 12 }}>KEY FINDINGS</div>
-                            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 12 }}>
+                        <div className={`${styles.card} ${styles.fullWidth}`}>
+                            <div className={styles.cardEyebrow}>KEY FINDINGS</div>
+                            <div className={styles.findingsGrid}>
                                 {[
                                     { icon: "⚠️", stat: `${RAW.filter(s => s.tier === "Red").length} stocks`, desc: "classified as Red risk (49%)" },
                                     { icon: "📉", stat: "15.9% avg float", desc: "barely above IDX 15% guideline" },
@@ -813,10 +688,10 @@ export default function App() {
                                     { icon: "🌏", stat: "387 stocks", desc: "have zero foreign investor presence" },
                                     { icon: "🔍", stat: "408 stocks", desc: "controlled by a single corporate entity >50%" },
                                 ].map(f => (
-                                    <div key={f.stat} style={{ background: "#060d18", borderRadius: 8, padding: "12px 14px", borderLeft: "3px solid #1e3a52" }}>
-                                        <div style={{ fontSize: 20, marginBottom: 4 }}>{f.icon}</div>
-                                        <div style={{ fontSize: 16, fontWeight: 700, color: "#e8f4f8", fontFamily: "DM Mono, monospace" }}>{f.stat}</div>
-                                        <div style={{ fontSize: 11, color: "#6b8aad", marginTop: 2 }}>{f.desc}</div>
+                                    <div key={f.stat} className={styles.findingCard}>
+                                        <div className={styles.findingIcon}>{f.icon}</div>
+                                        <div className={styles.findingStat}>{f.stat}</div>
+                                        <div className={styles.findingDesc}>{f.desc}</div>
                                     </div>
                                 ))}
                             </div>
@@ -826,39 +701,39 @@ export default function App() {
 
                 {/* RISK MAP TAB */}
                 {activeTab === "scatter" && (
-                    <div className="scatter-layout">
-                        <div style={{ flex: 1, background: "#09131f", border: "1px solid #132030", borderRadius: 10, padding: 20 }}>
-                            <div style={{ fontSize: 11, color: "#6b8aad", letterSpacing: 2, marginBottom: 4 }}>GOVERNANCE RISK MAP</div>
-                            <div style={{ fontSize: 14, color: "#e8f4f8", fontWeight: 600, marginBottom: 4 }}>
-                                Free Float % vs. HHI Concentration — Click a dot to inspect
-                            </div>
-                            <div style={{ fontSize: 11, color: "#6b8aad", marginBottom: 16 }}>
+                    <div className={styles.scatterLayout}>
+                        <div className={`${styles.card} ${styles.scatterMain}`}>
+                            <div className={styles.cardEyebrow}>GOVERNANCE RISK MAP</div>
+                            <div className={styles.cardTitle}>Free Float % vs. HHI Concentration — Click a dot to inspect</div>
+                            <div style={{ fontSize: "var(--text-xs)", color: "var(--color-text-muted)", marginBottom: "var(--space-4)" }}>
                                 Reference lines: HHI 2,500 (high concentration threshold) · Float 15% (IDX guideline)
                             </div>
-                            <ResponsiveContainer width="100%" height={500}>
-                                <ScatterChart margin={{ top: 10, right: 20, bottom: 20, left: 0 }}>
-                                    <CartesianGrid strokeDasharray="3 3" stroke="#132030" />
-                                    <XAxis dataKey="ff" name="Free Float %" type="number" domain={[0, 100]} tick={{ fill: "#6b8aad", fontSize: 10 }} label={{ value: "Free Float %", position: "insideBottom", offset: -10, fill: "#6b8aad", fontSize: 11 }} />
-                                    <YAxis dataKey="hhi" name="HHI" type="number" domain={[0, 10000]} tick={{ fill: "#6b8aad", fontSize: 10 }} label={{ value: "HHI", angle: -90, position: "insideLeft", fill: "#6b8aad", fontSize: 11 }} />
-                                    <Tooltip content={<CustomScatterTooltip />} />
-                                    <ReferenceLine y={2500} stroke="#e9c46a" strokeDasharray="4 4" label={{ value: "HHI 2,500", fill: "#e9c46a", fontSize: 9 }} />
-                                    <ReferenceLine x={15} stroke="#457B9D" strokeDasharray="4 4" label={{ value: "15%", fill: "#457B9D", fontSize: 9 }} />
-                                    {["Red", "Amber", "Green"].map(tier => (
-                                        <Scatter
-                                            key={tier}
-                                            name={tier}
-                                            data={filtered.filter(s => s.tier === tier)}
-                                            fill={TIER_COLOR[tier]}
-                                            fillOpacity={0.7}
-                                            onClick={d => setSelectedStock(selectedStock?.code === d.code ? null : d)}
-                                            cursor="pointer"
-                                        />
-                                    ))}
-                                </ScatterChart>
-                            </ResponsiveContainer>
-                            <div style={{ display: "flex", gap: 16, marginTop: 10 }}>
+                            <div className={styles.chartWrap}>
+                                <ResponsiveContainer width="100%" height={500}>
+                                    <ScatterChart margin={{ top: 10, right: 20, bottom: 20, left: 0 }}>
+                                        <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border-base)" />
+                                        <XAxis dataKey="ff" name="Free Float %" type="number" domain={[0, 100]} tick={{ fill: "var(--color-text-muted)", fontSize: 10 }} label={{ value: "Free Float %", position: "insideBottom", offset: -10, fill: "var(--color-text-muted)", fontSize: 11 }} />
+                                        <YAxis dataKey="hhi" name="HHI" type="number" domain={[0, 10000]} tick={{ fill: "var(--color-text-muted)", fontSize: 10 }} label={{ value: "HHI", angle: -90, position: "insideLeft", fill: "var(--color-text-muted)", fontSize: 11 }} />
+                                        <Tooltip content={<CustomScatterTooltip />} />
+                                        <ReferenceLine y={2500} stroke="var(--color-tier-amber)" strokeDasharray="4 4" label={{ value: "HHI 2,500", fill: "var(--color-tier-amber)", fontSize: 9 }} />
+                                        <ReferenceLine x={15} stroke="var(--color-chart-2)" strokeDasharray="4 4" label={{ value: "15%", fill: "var(--color-chart-2)", fontSize: 9 }} />
+                                        {["Red", "Amber", "Green"].map(tier => (
+                                            <Scatter
+                                                key={tier}
+                                                name={tier}
+                                                data={filtered.filter(s => s.tier === tier)}
+                                                fill={TIER_COLOR[tier]}
+                                                fillOpacity={0.7}
+                                                onClick={d => setSelectedStock(selectedStock?.code === d.code ? null : d)}
+                                                cursor="pointer"
+                                            />
+                                        ))}
+                                    </ScatterChart>
+                                </ResponsiveContainer>
+                            </div>
+                            <div className={styles.legendRow}>
                                 {["Red", "Amber", "Green"].map(t => (
-                                    <span key={t} style={{ fontSize: 11, color: TIER_COLOR[t], cursor: "pointer" }}
+                                    <span key={t} className={styles.legendItem} style={{ color: TIER_COLOR[t] }}
                                         onClick={() => setTierFilter(tierFilter === t ? null : t)}>
                                         ● {t} ({filtered.filter(s => s.tier === t).length})
                                     </span>
@@ -871,34 +746,33 @@ export default function App() {
 
                 {/* HHI HISTOGRAM TAB */}
                 {activeTab === "hhi" && (
-                    <div style={{ background: "#09131f", border: "1px solid #132030", borderRadius: 10, padding: 20 }}>
-                        <div style={{ fontSize: 11, color: "#6b8aad", letterSpacing: 2, marginBottom: 4 }}>HHI DISTRIBUTION<Tooltip2 text={METRIC_DEFS.HHI} /></div>
-                        <div style={{ fontSize: 14, color: "#e8f4f8", fontWeight: 600, marginBottom: 16 }}>
+                    <div className={styles.card}>
+                        <div className={styles.cardEyebrow}>HHI DISTRIBUTION<Tooltip2 text={METRIC_DEFS.HHI} /></div>
+                        <div className={styles.cardTitle}>
                             {stats.highConc > (stats.total / 2) ? `${Math.round((stats.highConc || 0) / (stats.total || 1) * 100)}% of Filtered Stocks Are Highly Concentrated (HHI > 2,500)` : "HHI Distribution of Filtered Stocks"}
                         </div>
-                        <ResponsiveContainer width="100%" height={380}>
-                            <BarChart data={hhiHist}>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#132030" />
-                                <XAxis dataKey="range" tick={{ fill: "#6b8aad", fontSize: 11 }} />
-                                <YAxis tick={{ fill: "#6b8aad", fontSize: 11 }} />
-                                <Tooltip contentStyle={{ background: "#09131f", border: "1px solid #1e3a52", borderRadius: 6 }} labelStyle={{ color: "#e8f4f8" }} />
-                                <Legend wrapperStyle={{ color: "#6b8aad", fontSize: 11 }} />
-                                <Bar dataKey="Low" stackId="a" fill="#2A9D8F" name="Low HHI (<1,500)" />
-                                <Bar dataKey="Moderate" stackId="a" fill="#E9C46A" name="Moderate HHI (1,500–2,500)" />
-                                <Bar dataKey="High" stackId="a" fill="#E76F51" name="High HHI (>2,500)" radius={[4, 4, 0, 0]} />
-                            </BarChart>
-                        </ResponsiveContainer>
-                        <div style={{ display: "flex", gap: 20, marginTop: 20, flexWrap: "wrap" }}>
+                        <div className={styles.chartWrap}>
+                            <ResponsiveContainer width="100%" height={380}>
+                                <BarChart data={hhiHist}>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border-base)" />
+                                    <XAxis dataKey="range" tick={{ fill: "var(--color-text-muted)", fontSize: 11 }} />
+                                    <YAxis tick={{ fill: "var(--color-text-muted)", fontSize: 11 }} />
+                                    <Tooltip contentStyle={{ background: "var(--color-bg-surface)", border: "1px solid var(--color-border-base)", borderRadius: "var(--radius-md)" }} labelStyle={{ color: "var(--color-text-primary)" }} />
+                                    <Legend wrapperStyle={{ color: "var(--color-text-muted)", fontSize: 11 }} />
+                                    <Bar dataKey="Low" stackId="a" fill="var(--color-tier-green)" name="Low HHI (<1,500)" />
+                                    <Bar dataKey="Moderate" stackId="a" fill="var(--color-tier-amber)" name="Moderate HHI (1,500–2,500)" />
+                                    <Bar dataKey="High" stackId="a" fill="var(--color-tier-red)" name="High HHI (>2,500)" radius={[4, 4, 0, 0]} />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        </div>
+                        <div className={styles.hhiZones}>
                             {["Low", "Moderate", "High"].map(hl => {
                                 const cnt = filtered.filter(s => s.hl === hl).length;
                                 return (
-                                    <div key={hl} onClick={() => setHhiFilter(hhiFilter === hl ? null : hl)} style={{
-                                        background: "#060d18", border: `1px solid ${HHI_COLOR[hl]}55`, borderRadius: 8,
-                                        padding: "12px 18px", cursor: "pointer", minWidth: 120
-                                    }}>
-                                        <div style={{ fontSize: 10, color: "#6b8aad", marginBottom: 4 }}>{hl.toUpperCase()} HHI</div>
-                                        <div style={{ fontSize: 28, fontWeight: 700, color: HHI_COLOR[hl], fontFamily: "DM Mono, monospace" }}>{cnt}</div>
-                                        <div style={{ fontSize: 10, color: "#6b8aad" }}>{stats.total ? Math.round(cnt / stats.total * 100) : 0}% of filtered</div>
+                                    <div key={hl} onClick={() => setHhiFilter(hhiFilter === hl ? null : hl)} className={styles.hhiZoneCard}>
+                                        <div className={styles.hhiZoneLabel}>{hl} HHI</div>
+                                        <div className={styles.hhiZoneValue} style={{ color: HHI_COLOR[hl] }}>{cnt}</div>
+                                        <div className={styles.hhiZoneSub}>{stats.total ? Math.round(cnt / stats.total * 100) : 0}% of filtered</div>
                                     </div>
                                 );
                             })}
@@ -908,31 +782,31 @@ export default function App() {
 
                 {/* FLAGS TAB */}
                 {activeTab === "flags" && (
-                    <div style={{ background: "#09131f", border: "1px solid #132030", borderRadius: 10, padding: 20 }}>
-                        <div style={{ fontSize: 11, color: "#6b8aad", letterSpacing: 2, marginBottom: 4 }}>GOVERNANCE FLAGS</div>
-                        <div style={{ fontSize: 14, color: "#e8f4f8", fontWeight: 600, marginBottom: 16 }}>
+                    <div className={styles.card}>
+                        <div className={styles.cardEyebrow}>GOVERNANCE FLAGS</div>
+                        <div className={styles.cardTitle}>
                             {flagCounts[0] ? `"${flagCounts[0].flag}" Affects ${flagCounts[0].count} of ${stats.total} Filtered Stocks` : "Flag Distribution"}
                         </div>
-                        <ResponsiveContainer width="100%" height={300}>
-                            <BarChart data={flagCounts} layout="vertical" onClick={d => d?.activePayload?.[0] && setFlagFilter(flagFilter === d.activePayload[0].payload.flag ? null : d.activePayload[0].payload.flag)}>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#132030" />
-                                <XAxis type="number" tick={{ fill: "#6b8aad", fontSize: 10 }} />
-                                <YAxis type="category" dataKey="flag" width={140} tick={{ fill: "#a8c8e8", fontSize: 10 }} />
-                                <Tooltip contentStyle={{ background: "#09131f", border: "1px solid #1e3a52", borderRadius: 6 }} labelStyle={{ color: "#e8f4f8" }} />
-                                <Bar dataKey="count" radius={[0, 4, 4, 0]} cursor="pointer">
-                                    {flagCounts.map((f, i) => <Cell key={f.flag} fill={["#d62828", "#e76f51", "#e9843a", "#e9c46a", "#6d6875"][i]} />)}
-                                </Bar>
-                            </BarChart>
-                        </ResponsiveContainer>
-                        <div style={{ fontSize: 10, color: "#457B9D", marginTop: 8 }}>↑ Click bars to filter stocks by flag</div>
-                        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 12, marginTop: 20 }}>
+                        <div className={styles.chartWrap}>
+                            <ResponsiveContainer width="100%" height={300}>
+                                <BarChart data={flagCounts} layout="vertical" onClick={d => d?.activePayload?.[0] && setFlagFilter(flagFilter === d.activePayload[0].payload.flag ? null : d.activePayload[0].payload.flag)}>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border-base)" />
+                                    <XAxis type="number" tick={{ fill: "var(--color-text-muted)", fontSize: 10 }} />
+                                    <YAxis type="category" dataKey="flag" width={140} tick={{ fill: "var(--color-text-secondary)", fontSize: 10 }} />
+                                    <Tooltip contentStyle={{ background: "var(--color-bg-surface)", border: "1px solid var(--color-border-base)", borderRadius: "var(--radius-md)" }} labelStyle={{ color: "var(--color-text-primary)" }} />
+                                    <Bar dataKey="count" radius={[0, 4, 4, 0]} cursor="pointer">
+                                        {flagCounts.map((f, i) => <Cell key={f.flag} fill={["var(--color-tier-red)", "var(--color-bear)", "var(--color-chart-3)", "var(--color-tier-amber)", "var(--color-neutral)"][i]} />)}
+                                    </Bar>
+                                </BarChart>
+                            </ResponsiveContainer>
+                        </div>
+                        <div className={styles.cardHint}>↑ Click bars to filter stocks by flag</div>
+                        <div className={styles.flagCards}>
                             {Object.entries(FLAG_DEFS).map(([flag, def]) => (
-                                <div key={flag} onClick={() => setFlagFilter(flagFilter === flag ? null : flag)} style={{
-                                    background: "#060d18", border: `1px solid ${flagFilter === flag ? "#457B9D" : "#1e3a52"}`,
-                                    borderRadius: 8, padding: "12px 14px", cursor: "pointer"
-                                }}>
-                                    <div style={{ fontSize: 12, color: "#e8f4f8", fontWeight: 600, marginBottom: 4 }}>{flag}</div>
-                                    <div style={{ fontSize: 10, color: "#6b8aad", lineHeight: 1.4 }}>{def}</div>
+                                <div key={flag} onClick={() => setFlagFilter(flagFilter === flag ? null : flag)}
+                                    className={`${styles.flagCard}${flagFilter === flag ? " " + styles.flagCardActive : ""}`}>
+                                    <div className={styles.flagCardTitle}>{flag}</div>
+                                    <div className={styles.flagCardDesc}>{def}</div>
                                 </div>
                             ))}
                         </div>
@@ -941,92 +815,79 @@ export default function App() {
 
                 {/* SCREENER TABLE TAB */}
                 {activeTab === "table" && (
-                    <div className="screener-layout">
-                        <div style={{ flex: 1 }}>
-                            <div style={{ background: "#09131f", border: "1px solid #132030", borderRadius: 10, padding: 20 }}>
-                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+                    <div className={styles.screenerLayout}>
+                        <div className={styles.screenerMain}>
+                            <div className={styles.card}>
+                                <div className={styles.screenerHeader}>
                                     <div>
-                                        <div style={{ fontSize: 11, color: "#6b8aad", letterSpacing: 2, marginBottom: 2 }}>STOCK SCREENER</div>
-                                        <div style={{ fontSize: 13, color: "#e8f4f8" }}>{sorted.length} stocks — cells colour-coded by value</div>
+                                        <div className={styles.cardEyebrow}>STOCK SCREENER</div>
+                                        <div className={styles.screenerCount}>{sorted.length} stocks — cells colour-coded by value</div>
                                     </div>
-                                    <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-                                        <select
-                                            value={ownerTypeFilter}
-                                            onChange={e => setOwnerTypeFilter(e.target.value)}
-                                            style={{
-                                                background: "#060d18", border: "1px solid #1e3a52", borderRadius: 6,
-                                                color: "#e8f4f8", padding: "7px 12px", fontSize: 12, outline: "none"
-                                            }}
-                                        >
+                                    <div className={styles.screenerHeaderRight}>
+                                        <select value={ownerTypeFilter} onChange={e => setOwnerTypeFilter(e.target.value)} className={styles.ownerFilter}>
                                             <option value="All">All Owners</option>
                                             <option value="Company/Institution">Company/Institution</option>
                                             <option value="Individual">Individual</option>
                                         </select>
                                         {search && (
-                                            <span aria-label={`Active search: ${search}`} style={{ fontSize: 11, color: "#457B9D", fontFamily: "DM Mono, monospace" }}>
+                                            <span aria-label={`Active search: ${search}`} className={styles.activeSearch}>
                                                 <span aria-hidden="true">🔍</span> &ldquo;{search}&rdquo;
                                             </span>
                                         )}
                                     </div>
                                 </div>
-                                <div style={{ overflowX: "auto" }}>
-                                    <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11 }}>
-                                        <thead>
-                                            <tr style={{ borderBottom: "2px solid #132030" }}>
-                                                <th style={{ textAlign: "left", padding: "8px", color: "#457B9D", cursor: "pointer", fontFamily: "DM Mono, monospace", fontSize: 10 }} onClick={() => sort("code")}>CODE{sortIcon("code")}</th>
-                                                <th style={{ textAlign: "left", padding: "8px", color: "#457B9D", fontSize: 10 }}>ISSUER</th>
-                                                <th style={{ textAlign: "left", padding: "8px", color: "#457B9D", fontSize: 10 }}>TIER</th>
+                                <div className={styles.tableWrap}>
+                                    <table className={styles.table}>
+                                        <thead className={styles.thead}>
+                                            <tr>
+                                                <th className={`${styles.th} ${styles.thSortable}`} onClick={() => sort("code")}>CODE{sortIcon("code")}</th>
+                                                <th className={styles.th}>ISSUER</th>
+                                                <th className={styles.th}>TIER</th>
                                                 {tableCols.slice(1).map(c => (
-                                                    <th key={c.key} style={{ textAlign: "right", padding: "8px", color: "#457B9D", cursor: "pointer", fontFamily: "DM Mono, monospace", fontSize: 10, whiteSpace: "nowrap" }} onClick={() => sort(c.key)}>
+                                                    <th key={c.key} className={`${styles.th} ${styles.thSortable} ${styles.thRight}`} onClick={() => sort(c.key)}>
                                                         {c.label}{sortIcon(c.key)}
                                                     </th>
                                                 ))}
-                                                <th style={{ textAlign: "left", padding: "8px", color: "#457B9D", fontSize: 10 }}>FLAGS</th>
+                                                <th className={styles.th} title="Visual tier indicator only">TIER VIZ</th>
+                                                <th className={styles.th}>FLAGS</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {sorted.slice(0, 200).map((s, i) => (
-                                                <tr key={s.code}
-                                                    onClick={() => setSelectedStock(selectedStock?.code === s.code ? null : s)}
-                                                    style={{
-                                                        borderBottom: "1px solid #0d1e30",
-                                                        background: selectedStock?.code === s.code ? "#132030" : i % 2 === 0 ? "#09131f" : "#060d18",
-                                                        cursor: "pointer", transition: "background 0.1s"
-                                                    }}
-                                                    onMouseEnter={e => selectedStock?.code !== s.code && (e.currentTarget.style.background = "#0d1e30")}
-                                                    onMouseLeave={e => selectedStock?.code !== s.code && (e.currentTarget.style.background = i % 2 === 0 ? "#09131f" : "#060d18")}
-                                                >
-                                                    <td style={{ padding: "6px 8px", color: "#e8f4f8", fontFamily: "DM Mono, monospace", fontWeight: 600, fontSize: 11, whiteSpace: "nowrap" }}>{s.code}</td>
-                                                    <td style={{ padding: "6px 8px", color: "#6b8aad", maxWidth: 180, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s.issuer}</td>
-                                                    <td style={{ padding: "6px 8px" }}>
-                                                        <span style={{ color: TIER_COLOR[s.tier], fontSize: 10, fontWeight: 700 }}>{s.tier}</span>
-                                                    </td>
-                                                    <HeatCell value={s.hhi} min={hhhiRange.min} max={hhhiRange.max} fmt={v => v.toFixed(0)} />
-                                                    <HeatCell value={s.ff} min={ffRange.min} max={ffRange.max} reverse fmt={v => v.toFixed(1) + "%"} />
-                                                    <HeatCell value={s.c1} min={0} max={100} fmt={v => v.toFixed(1) + "%"} />
-                                                    <HeatCell value={s.c3} min={0} max={100} fmt={v => v.toFixed(1) + "%"} />
-                                                    <td style={{ padding: "6px 8px", color: "#6b8aad", maxWidth: 140, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={s.th}>{s.th || "—"}</td>
-                                                    <td style={{ padding: "6px 8px" }}>
-                                                        <span style={{
-                                                            background: s.tht === "ID" ? "#2A9D8F22" : "#E9C46A22",
-                                                            color: s.tht === "ID" ? "#2A9D8F" : "#E9C46A",
-                                                            border: `1px solid ${s.tht === "ID" ? "#2A9D8F55" : "#E9C46A55"}`,
-                                                            borderRadius: 4, padding: "2px 6px", fontSize: 9
-                                                        }}>
-                                                            {s.tht === "ID" ? "Individual" : "Company"}
-                                                        </span>
-                                                    </td>
-                                                    <HeatCell value={s.fr} min={frRange.min} max={frRange.max} reverse fmt={v => v.toFixed(1) + "%"} />
-                                                    <HeatCell value={s.ip} min={0} max={100} fmt={v => v.toFixed(1) + "%"} />
-                                                    <HeatCell value={s.ss} min={0} max={100} fmt={v => v.toFixed(0)} />
-                                                    <td style={{ padding: "6px 8px", minWidth: 160 }}>
-                                                        {s.flags.map(f => <FlagPill key={f} flag={f} />)}
-                                                    </td>
-                                                </tr>
-                                            ))}
+                                            {sorted.slice(0, 200).map((s, i) => {
+                                                const tierClass = s.tier === "Red" ? styles.tierRed : s.tier === "Amber" ? styles.tierAmber : styles.tierGreen;
+                                                return (
+                                                    <tr key={s.code}
+                                                        onClick={() => setSelectedStock(selectedStock?.code === s.code ? null : s)}
+                                                        className={`${styles.tr}${selectedStock?.code === s.code ? " " + styles.trSelected : ""}`}
+                                                        style={{ animationDelay: `${Math.min(i * 10, 500)}ms` }}>
+                                                        <td className={styles.tdTicker}>{s.code}</td>
+                                                        <td className={styles.tdIssuer}>{s.issuer}</td>
+                                                        <td className={styles.td}>
+                                                            <span className={`${styles.tierBadge} ${tierClass}`}>{s.tier}</span>
+                                                        </td>
+                                                        <HeatCell value={s.hhi} min={hhhiRange.min} max={hhhiRange.max} fmt={v => v.toFixed(0)} />
+                                                        <HeatCell value={s.ff} min={ffRange.min} max={ffRange.max} reverse fmt={v => v.toFixed(1) + "%"} />
+                                                        <HeatCell value={s.c1} min={0} max={100} fmt={v => v.toFixed(1) + "%"} />
+                                                        <HeatCell value={s.c3} min={0} max={100} fmt={v => v.toFixed(1) + "%"} />
+                                                        <td className={styles.tdOwner} title={s.th}>{s.th || "—"}</td>
+                                                        <td className={styles.td}>
+                                                            <span className={`${styles.ownerBadge} ${s.tht === "ID" ? styles.ownerBadgeID : styles.ownerBadgeCP}`}>
+                                                                {s.tht === "ID" ? "Individual" : "Company"}
+                                                            </span>
+                                                        </td>
+                                                        <HeatCell value={s.fr} min={frRange.min} max={frRange.max} reverse fmt={v => v.toFixed(1) + "%"} />
+                                                        <HeatCell value={s.ip} min={0} max={100} fmt={v => v.toFixed(1) + "%"} />
+                                                        <HeatCell value={s.ss} min={0} max={100} fmt={v => v.toFixed(0)} />
+                                                        <td className={styles.tdSparkline}>
+                                                            <MiniSparkline value={s.ff} tier={s.tier} />
+                                                        </td>
+                                                        <td className={styles.tdFlags}>{s.flags.map(f => <FlagPill key={f} flag={f} />)}</td>
+                                                    </tr>
+                                                );
+                                            })}
                                         </tbody>
                                     </table>
-                                    {sorted.length > 200 && <div style={{ color: "#6b8aad", fontSize: 11, padding: "10px", textAlign: "center" }}>Showing 200 of {sorted.length} — use filters to narrow down</div>}
+                                    {sorted.length > 200 && <div className={styles.tableMore}>Showing 200 of {sorted.length} — use filters to narrow down</div>}
                                 </div>
                             </div>
                         </div>
@@ -1036,57 +897,55 @@ export default function App() {
 
                 {/* OWNERS TAB */}
                 {activeTab === "owners" && (
-                    <div style={{ background: "#09131f", border: "1px solid #132030", borderRadius: 10, padding: 20 }}>
-                        <div style={{ fontSize: 11, color: "#6b8aad", letterSpacing: 2, marginBottom: 4 }}>TOP HOLDERS DISSECTION</div>
-                        <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 16, gap: 10 }}>
-                            <div style={{ fontSize: 14, color: "#e8f4f8", fontWeight: 600 }}>
-                                {filteredOwners.length} Unique Owners Found
-                            </div>
+                    <div className={styles.card}>
+                        <div className={styles.cardEyebrow}>TOP HOLDERS DISSECTION</div>
+                        <div className={styles.ownersHeader}>
+                            <div className={styles.ownersTitle}>{filteredOwners.length} Unique Owners Found</div>
                             <input
                                 type="text"
                                 placeholder="Search owner name..."
                                 value={ownerSearch}
                                 onChange={e => setOwnerSearch(e.target.value)}
-                                style={{ background: "#060d18", border: "1px solid #1e3a52", borderRadius: 6, padding: "8px 12px", color: "#e8f4f8", fontSize: 12, outline: "none", width: 200 }}
+                                className={styles.ownersSearch}
                             />
                         </div>
 
-                        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 20, marginBottom: 20 }}>
-                            <div style={{ background: "#060d18", border: "1px solid #132030", borderRadius: 8, padding: 16, display: "flex", flexDirection: "column", alignItems: "center" }}>
-                                <div style={{ fontSize: 11, color: "#6b8aad", letterSpacing: 1, marginBottom: 8, alignSelf: "flex-start" }}>OWNER COMPOSITION</div>
+                        <div className={styles.ownerChartsGrid}>
+                            <div className={styles.ownerChartCard}>
+                                <div className={styles.cardEyebrow} style={{ alignSelf: "flex-start" }}>OWNER COMPOSITION</div>
                                 <ResponsiveContainer width="100%" height={160}>
                                     <PieChart cursor="pointer">
                                         <Pie data={ownerTypeData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={40} outerRadius={60} stroke="none">
                                             {ownerTypeData.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.color} />)}
                                         </Pie>
-                                        <Tooltip contentStyle={{ background: "#09131f", border: "1px solid #1e3a52", borderRadius: 6, fontSize: 12 }} itemStyle={{ color: "#e8f4f8" }} />
-                                        <Legend iconType="circle" wrapperStyle={{ fontSize: 11, color: "#a8c8e8" }} />
+                                        <Tooltip contentStyle={{ background: "var(--color-bg-surface)", border: "1px solid var(--color-border-base)", borderRadius: "var(--radius-md)", fontSize: 12 }} itemStyle={{ color: "var(--color-text-primary)" }} />
+                                        <Legend iconType="circle" wrapperStyle={{ fontSize: 11, color: "var(--color-text-secondary)" }} />
                                     </PieChart>
                                 </ResponsiveContainer>
                             </div>
-                            <div style={{ background: "#060d18", border: "1px solid #132030", borderRadius: 8, padding: 16 }}>
-                                <div style={{ fontSize: 11, color: "#6b8aad", letterSpacing: 1, marginBottom: 8 }}>LARGEST HOLDING ENTITIES</div>
+                            <div className={styles.ownerChartCard}>
+                                <div className={styles.cardEyebrow} style={{ alignSelf: "flex-start" }}>LARGEST HOLDING ENTITIES</div>
                                 <ResponsiveContainer width="100%" height={160}>
                                     <BarChart data={topOwnersBarData} layout="vertical" margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
-                                        <CartesianGrid strokeDasharray="3 3" stroke="#132030" horizontal={false} />
-                                        <XAxis type="number" tick={{ fill: "#6b8aad", fontSize: 9 }} />
-                                        <YAxis dataKey="name" type="category" width={110} tick={{ fill: "#a8c8e8", fontSize: 10 }} />
-                                        <Tooltip contentStyle={{ background: "#09131f", border: "1px solid #1e3a52", borderRadius: 6, fontSize: 12 }} labelStyle={{ color: "#e8f4f8" }} cursor={{ fill: "#132030" }} />
-                                        <Bar dataKey="count" fill="#2A9D8F" radius={[0, 4, 4, 0]} name="Stocks Held" />
+                                        <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border-base)" horizontal={false} />
+                                        <XAxis type="number" tick={{ fill: "var(--color-text-muted)", fontSize: 9 }} />
+                                        <YAxis dataKey="name" type="category" width={110} tick={{ fill: "var(--color-text-secondary)", fontSize: 10 }} />
+                                        <Tooltip contentStyle={{ background: "var(--color-bg-surface)", border: "1px solid var(--color-border-base)", borderRadius: "var(--radius-md)", fontSize: 12 }} labelStyle={{ color: "var(--color-text-primary)" }} cursor={{ fill: "var(--color-bg-elevated)" }} />
+                                        <Bar dataKey="count" fill="var(--color-chart-1)" radius={[0, 4, 4, 0]} name="Stocks Held" />
                                     </BarChart>
                                 </ResponsiveContainer>
                             </div>
                         </div>
 
-                        <div style={{ overflowX: "auto" }}>
-                            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11 }}>
+                        <div className={styles.ownerTableWrap}>
+                            <table className={styles.ownerTable}>
                                 <thead>
-                                    <tr style={{ borderBottom: "2px solid #132030" }}>
-                                        <th style={{ textAlign: "left", padding: "10px 8px", color: "#457B9D", fontSize: 10, width: "30%" }}>OWNER NAME</th>
-                                        <th style={{ textAlign: "left", padding: "10px 8px", color: "#457B9D", fontSize: 10, width: "12%" }}>TYPE</th>
-                                        <th style={{ textAlign: "right", padding: "10px 8px", color: "#457B9D", fontSize: 10, width: "10%" }}>STOCKS</th>
-                                        <th style={{ textAlign: "right", padding: "10px 8px", color: "#457B9D", fontSize: 10, width: "12%" }}>∑ EST. RISK WT</th>
-                                        <th style={{ textAlign: "left", padding: "10px 16px", color: "#457B9D", fontSize: 10, width: "36%" }}>PORTFOLIO EXPOSURE</th>
+                                    <tr>
+                                        <th className={styles.ownerTh} style={{ width: "30%" }}>OWNER NAME</th>
+                                        <th className={styles.ownerTh} style={{ width: "12%" }}>TYPE</th>
+                                        <th className={`${styles.ownerTh} ${styles.ownerThRight}`} style={{ width: "10%" }}>STOCKS</th>
+                                        <th className={`${styles.ownerTh} ${styles.ownerThRight}`} style={{ width: "12%" }}>∑ EST. RISK WT</th>
+                                        <th className={styles.ownerTh} style={{ width: "36%" }}>PORTFOLIO EXPOSURE</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -1095,52 +954,41 @@ export default function App() {
                                         const visibleStocks = isExpanded ? o.stocks : o.stocks.slice(0, 5);
                                         const hiddenCount = o.stocks.length - 5;
                                         return (
-                                            <tr key={o.name} style={{
-                                                borderBottom: "1px solid #132030",
-                                                background: i % 2 === 0 ? "#09131f" : "#060d18"
-                                            }}>
-                                                <td style={{ padding: "14px 8px", color: "#e8f4f8", fontWeight: 600, maxWidth: 240, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={o.name}>{o.name}</td>
-                                                <td style={{ padding: "14px 8px" }}>
+                                            <tr key={o.name} className={styles.ownerTr}>
+                                                <td className={styles.ownerTd} title={o.name}>{o.name}</td>
+                                                <td className={styles.ownerTd}>
                                                     <span style={{
-                                                        background: OWNER_TYPE_MAP[o.type]?.bg ?? "#E9C46A22",
-                                                        color: OWNER_TYPE_MAP[o.type]?.color ?? "#E9C46A",
-                                                        border: `1px solid ${OWNER_TYPE_MAP[o.type]?.border ?? "#E9C46A55"}`,
-                                                        borderRadius: 4, padding: "3px 8px", fontSize: 9, fontWeight: 500
+                                                        background: OWNER_TYPE_MAP[o.type]?.bg ?? "rgba(255,214,10,0.13)",
+                                                        color: OWNER_TYPE_MAP[o.type]?.color ?? "var(--color-tier-amber)",
+                                                        border: `1px solid ${OWNER_TYPE_MAP[o.type]?.border ?? "rgba(255,214,10,0.3)"}`,
+                                                        borderRadius: "var(--radius-sm)", padding: "3px 8px", fontSize: 9, fontWeight: 500
                                                     }} title={OWNER_TYPE_MAP[o.type]?.label ?? o.type}>
                                                         {OWNER_TYPE_MAP[o.type]?.label ?? o.type}
                                                     </span>
                                                 </td>
-                                                <td style={{ padding: "14px 8px", textAlign: "right", color: "#a8c8e8", fontFamily: "DM Mono, monospace", fontSize: 14 }}>
-                                                    {o.count}
-                                                </td>
-                                                <td style={{ padding: "14px 8px", textAlign: "right", color: o.totalPct > 100 ? "#e76f51" : "#E9C46A", fontFamily: "DM Mono, monospace", fontSize: 13, fontWeight: 600 }}>
-                                                    {o.totalPct.toFixed(1)}%
-                                                </td>
-                                                <td style={{ padding: "10px 16px" }}>
-                                                    <div style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center" }}>
+                                                <td className={`${styles.ownerTd} ${styles.ownerTdRight}`} style={{ fontSize: "var(--text-md)" }}>{o.count}</td>
+                                                <td className={`${styles.ownerTd} ${styles.ownerTdRight}`} style={{ color: o.totalPct > 100 ? "var(--color-tier-red)" : "var(--color-tier-amber)", fontSize: "var(--text-base)" }}>{o.totalPct.toFixed(1)}%</td>
+                                                <td className={styles.ownerTd} style={{ maxWidth: "none", overflow: "visible", whiteSpace: "normal" }}>
+                                                    <div className={styles.ownerStockTags}>
                                                         {visibleStocks.map(sym => (
-                                                            <span key={sym.code} style={{
-                                                                background: "#132030", color: "#e8f4f8",
-                                                                borderRadius: 4, padding: "4px 8px", fontSize: 10, fontFamily: "DM Mono, monospace",
-                                                                border: "1px solid #1e3a52", display: "flex", flexDirection: "column", gap: 2, minWidth: 100
-                                                            }}>
-                                                                <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                                                                    <b style={{ color: "#a8c8e8" }}>{sym.code}</b>
-                                                                    <span style={{ color: sym.pct > 50 ? "#e76f51" : sym.pct > 25 ? "#E9C46A" : "#2A9D8F" }}>{sym.pct.toFixed(2)}%</span>
+                                                            <span key={sym.code} className={styles.ownerStockTag}>
+                                                                <span className={styles.ownerStockTagHeader}>
+                                                                    <b className={styles.ownerStockCode}>{sym.code}</b>
+                                                                    <span style={{ color: sym.pct > 50 ? "var(--color-tier-red)" : sym.pct > 25 ? "var(--color-tier-amber)" : "var(--color-tier-green)" }}>{sym.pct.toFixed(2)}%</span>
                                                                 </span>
-                                                                {sym.issuer && <span style={{ fontSize: 9, color: "#6b8aad", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 140 }} title={sym.issuer}>{sym.issuer}</span>}
+                                                                {sym.issuer && <span className={styles.ownerStockIssuer} title={sym.issuer}>{sym.issuer}</span>}
                                                             </span>
                                                         ))}
                                                         {!isExpanded && hiddenCount > 0 && (
-                                                            <button onClick={() => toggleExpand(o.name)} style={{ background: "#2A9D8F22", color: "#2A9D8F", border: "1px dashed #2A9D8F55", borderRadius: 4, padding: "3px 8px", fontSize: 10, cursor: "pointer", fontWeight: 600 }}>+{hiddenCount} More</button>
+                                                            <button onClick={() => toggleExpand(o.name)} className={styles.expandBtn}>+{hiddenCount} More</button>
                                                         )}
                                                         {isExpanded && hiddenCount > 0 && (
-                                                            <button onClick={() => toggleExpand(o.name)} style={{ background: "transparent", color: "#e76f51", border: "none", padding: "3px 8px", fontSize: 10, cursor: "pointer", textDecoration: "underline", fontWeight: 600 }}>Show Less</button>
+                                                            <button onClick={() => toggleExpand(o.name)} className={styles.collapseBtn}>Show Less</button>
                                                         )}
                                                     </div>
                                                 </td>
                                             </tr>
-                                        )
+                                        );
                                     })}
                                 </tbody>
                             </table>
