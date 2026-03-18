@@ -15,6 +15,13 @@ export async function getUserPlan(userId: string): Promise<Plan> {
 }
 
 /**
+ * Upgrade user's plan to premium after successful payment.
+ */
+export async function upgradePlan(userId: string): Promise<void> {
+  await userQueries.updatePlan(userId, 'premium');
+}
+
+/**
  * Ensure user exists in database. Creates with plan 'free' if new.
  */
 export async function ensureUser(

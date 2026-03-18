@@ -5,8 +5,8 @@
 
 import type { NextAuthOptions } from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
-import { ensureUser, getUserPlan } from '@/lib/services/userService';
 import type { Plan } from '@/lib/auth/types';
+import { ensureUser, getUserPlan } from '../services/userService';
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -22,13 +22,17 @@ export const authOptions: NextAuthOptions = {
       }
       return true;
     },
-    async jwt({ token }) {
+    async jwt({ token, user }) {
+      if (user) {
+        token.sub = user.id;
+      }
       return token;
     },
     async session({ session, token }) {
-      if (session.user) {
-        const plan: Plan = await getUserPlan(token.sub ?? '');
-        (session.user as { id?: string; plan?: Plan }).id = token.sub ?? undefined;
+      if (session.user && token.sub) {
+        (session.user as { id?: string; plan?: Plan }).id = token.sub;
+        // Fetch plan from DB on every session read so it refreshes after payment
+        const plan = await getUserPlan(token.sub);
         (session.user as { id?: string; plan?: Plan }).plan = plan;
       }
       return session;

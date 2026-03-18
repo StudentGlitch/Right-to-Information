@@ -19,6 +19,7 @@ interface AppHeaderProps {
   setHhiFilter?: (hl: string | null) => void;
   flagFilter?: string | null;
   setFlagFilter?: (flag: string | null) => void;
+  onReplayTour?: () => void;
 }
 
 export function AppHeader({
@@ -35,6 +36,7 @@ export function AppHeader({
   setHhiFilter,
   flagFilter = null,
   setFlagFilter,
+  onReplayTour,
 }: AppHeaderProps): React.ReactElement {
   const handleSearchChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>): void => {
@@ -51,7 +53,7 @@ export function AppHeader({
           <h1 className="header-title">{dynamicTitle}</h1>
         </div>
         <div className="header-right">
-          <div className="search-wrap">
+          <div className="search-wrap" data-tour="search">
             <span
               aria-hidden="true"
               style={{
@@ -103,6 +105,25 @@ export function AppHeader({
               </button>
             )}
           </div>
+          {onReplayTour && (
+            <button
+              onClick={onReplayTour}
+              title="Replay onboarding tour"
+              aria-label="Replay onboarding tour"
+              style={{
+                background: '#132030',
+                border: '1px solid #457B9D',
+                color: '#a8c8e8',
+                borderRadius: 6,
+                padding: '6px 12px',
+                cursor: 'pointer',
+                fontSize: 12,
+                whiteSpace: 'nowrap',
+              }}
+            >
+              Tour
+            </button>
+          )}
           <AuthButton />
           {hasFilter && (
             <button
@@ -130,6 +151,39 @@ export function AppHeader({
             ☰
           </button>
         </div>
+      </div>
+
+      <div data-tour="presets" style={{ display: 'flex', gap: 8, flexWrap: 'nowrap', overflowX: 'auto', margin: '12px 0', paddingBottom: 4 }}>
+        {[
+          { id: 'red', label: 'Red Risk', active: tierFilter === 'Red', onClick: () => setTierFilter(tierFilter === 'Red' ? null : 'Red'), color: '#E76F51' },
+          { id: 'amber', label: 'Amber Risk', active: tierFilter === 'Amber', onClick: () => setTierFilter(tierFilter === 'Amber' ? null : 'Amber'), color: '#E9C46A' },
+          { id: 'green', label: 'Green Risk', active: tierFilter === 'Green', onClick: () => setTierFilter(tierFilter === 'Green' ? null : 'Green'), color: '#2A9D8F' },
+          { id: 'hhi', label: 'High HHI', active: hhiFilter === 'High', onClick: () => setHhiFilter && setHhiFilter(hhiFilter === 'High' ? null : 'High'), color: '#E76F51' },
+          { id: 'lowFloat', label: 'Low Float', active: flagFilter === 'LowFloat<15%', onClick: () => setFlagFilter && setFlagFilter(flagFilter === 'LowFloat<15%' ? null : 'LowFloat<15%'), color: '#E9C46A' },
+          { id: 'criticalFloat', label: 'Critical Float', active: flagFilter === 'CriticalFloat<5%', onClick: () => setFlagFilter && setFlagFilter(flagFilter === 'CriticalFloat<5%' ? null : 'CriticalFloat<5%'), color: '#d62828' },
+          { id: 'reset', label: 'Reset', active: false, onClick: clearFilters, color: '#6b8aad' },
+        ].map((p) => (
+          <button
+            key={p.id}
+            onClick={p.onClick}
+            style={{
+              height: 32,
+              padding: '0 12px',
+              minWidth: 'fit-content',
+              background: p.active ? '#64b5f6' : '#2d3748',
+              border: '1px solid #4b5563',
+              borderRadius: 6,
+              color: p.active ? '#ffffff' : (p.id === 'reset' ? '#9ca3af' : p.color),
+              fontSize: 13,
+              fontWeight: 500,
+              cursor: 'pointer',
+              whiteSpace: 'nowrap',
+              flexShrink: 0,
+            }}
+          >
+            {p.label}
+          </button>
+        ))}
       </div>
 
       {hasFilter && (

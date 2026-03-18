@@ -14,6 +14,7 @@ export function TabBar({ NAV_TABS, activeTab, setActiveTab }: TabBarProps): Reac
       {NAV_TABS.map(([id, label]) => (
         <button
           key={id}
+          data-tour={id === 'overview' ? 'tab-overview' : id === 'table' ? 'tab-screener' : undefined}
           onClick={() => setActiveTab(id)}
           style={{
             background: 'none',
