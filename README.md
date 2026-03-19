@@ -1,13 +1,15 @@
 # Right-to-Information
 
-My experiment for vibe coding to make a website hub for financial information.
+A financial transparency hub for listed securities in Indonesia, exposing ownership concentration and governance metrics.
 
 ## Tech Stack
 
-- **React 18** — UI framework
-- **Recharts** — data visualisation
-- **Vite** — build tool
-- **Vercel** — hosting target
+- **Next.js 16** — Full-stack React framework (App Router)
+- **NextAuth v4** — Google OAuth authentication
+- **MongoDB** — Data storage (stocks, owners, users)
+- **Midtrans** — Payment gateway (premium plan)
+- **Recharts** — Data visualisation
+- **Vercel** — Hosting target
 
 ---
 
@@ -15,24 +17,15 @@ My experiment for vibe coding to make a website hub for financial information.
 
 ### Prerequisites
 
-Make sure you have [Git](https://git-scm.com/) and [Node.js](https://nodejs.org/) (v20+) installed on your machine.
+- [Git](https://git-scm.com/)
+- [Node.js](https://nodejs.org/) v20+
+- A MongoDB instance (local or [MongoDB Atlas](https://www.mongodb.com/atlas))
 
 ### Configure Git (Required Before First Commit)
-
-Before you can commit and push code, tell Git who you are by running the following commands, replacing the placeholders with your own details:
 
 ```bash
 git config --global user.name "Your Name"
 git config --global user.email "your.email@example.com"
-```
-
-> **Tip:** Use `--global` to apply settings to all repositories on your machine. Omit it to apply settings only to the current repository.
-
-To verify your configuration:
-
-```bash
-git config --global user.name
-git config --global user.email
 ```
 
 ## Local Development
@@ -41,37 +34,53 @@ git config --global user.email
 # 1. Install dependencies
 npm install
 
-# 2. Start the dev server (http://localhost:5173)
+# 2. Copy the example env file and fill in your values
+cp .env.example .env.local
+
+# 3. Start the dev server (http://localhost:3000)
 npm run dev
 ```
 
 ## Production Build
 
 ```bash
-npm run build      # outputs to dist/
-npm run preview    # preview the built app locally
+npm run build   # Next.js builds to .next/
+npm start       # Start the production server
 ```
 
 ## Environment Variables
 
-Copy `.env.example` to `.env` and fill in any required values before running locally.
+Copy `.env.example` to `.env.local` and fill in the required values.
 
-```bash
-cp .env.example .env
-```
+| Variable | Required | Description |
+|---|---|---|
+| `NEXTAUTH_URL` | **Yes (prod)** | Full URL of your deployment, e.g. `https://yourapp.vercel.app` |
+| `NEXTAUTH_SECRET` | **Yes** | Random secret for JWT signing (`openssl rand -base64 32`) |
+| `GOOGLE_CLIENT_ID` | **Yes** | Google OAuth client ID |
+| `GOOGLE_CLIENT_SECRET` | **Yes** | Google OAuth client secret |
+| `MONGODB_URI` | **Yes** | MongoDB connection string |
+| `MIDTRANS_IS_PRODUCTION` | No | `true` for live payments, `false` for sandbox (default) |
+| `MIDTRANS_SERVER_KEY` | Yes (payments) | Midtrans server key |
+| `MIDTRANS_CLIENT_KEY` | Yes (payments) | Midtrans client key |
 
-All environment variables exposed to the browser must be prefixed with `VITE_`.
+> **Note:** Do not set `NEXTAUTH_URL` to an empty string. Either provide a valid URL or leave the variable unset — NextAuth will fall back to `localhost:3000` automatically for local development.
 
 ## Deploying to Vercel
 
-### Option A — Vercel CLI / Dashboard (recommended)
+### Recommended: Vercel Dashboard / CLI
 
-1. Push to **main** — the GitHub Actions workflow will build and deploy automatically
-   (requires `VERCEL_TOKEN`, `VERCEL_ORG_ID`, and `VERCEL_PROJECT_ID` secrets set in the repo).
-2. Alternatively, connect the repo in the Vercel dashboard and import the project.
-   - **Framework Preset**: Vite
-   - **Build Command**: `npm run build`
-   - **Output Directory**: `dist`
+1. Import the repository in the **Vercel dashboard**.
+2. In **Settings → Build & Output Settings**:
+   - **Framework Preset:** `Next.js`
+   - **Build Command:** `npm run build` (default)
+   - **Output Directory:** *(leave empty — Next.js manages `.next/` automatically)*
+3. In **Settings → Environment Variables**, add all required variables from the table above.  
+   The most important ones for the app to start: `NEXTAUTH_URL`, `NEXTAUTH_SECRET`, `MONGODB_URI`.
+4. Push to **main** — Vercel will build and deploy automatically.
+
+### Why the Output Directory must be left empty
+
+Next.js on Vercel outputs to `.next/`, not `dist/`. Vercel's Next.js runtime handles this automatically when the Framework Preset is set to **Next.js**. Setting Output Directory to `dist` will cause a deployment failure.
 
 ### Option B — Docker
 
@@ -80,7 +89,7 @@ All environment variables exposed to the browser must be prefixed with `VITE_`.
 docker build -t right-to-information .
 
 # Run the container
-docker run -p 80:80 right-to-information
+docker run -p 3000:3000 right-to-information
 ```
 
 Or with Docker Compose:
