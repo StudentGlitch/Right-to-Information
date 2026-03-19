@@ -9,7 +9,33 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/config';
 import { snap, PREMIUM_PRICE_IDR, PRODUCT_NAME } from '@/lib/midtrans';
 
-export async function POST(_req: NextRequest) {
+/**
+ * Derive the application base URL from the request or environment variables.
+ * Prefers NEXTAUTH_URL, then falls back to the Host / x-forwarded-proto headers.
+ */
+function getBaseUrl(req: NextRequest): string {
+  const envUrl = process.env.NEXTAUTH_URL;
+  if (envUrl) {
+    // Validate it is a proper URL before using it
+    try {
+      return new URL(envUrl).origin;
+    } catch {
+      // Fall through to header-based derivation
+    }
+  }
+
+  // Derive from request headers (works on Vercel and any reverse-proxy setup)
+  const proto = req.headers.get('x-forwarded-proto') ?? 'https';
+  const host = req.headers.get('x-forwarded-host') ?? req.headers.get('host');
+  if (host) {
+    return `${proto}://${host}`;
+  }
+
+  // Last-resort fallback so the route still returns a clear error instead of crashing
+  return '';
+}
+
+export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
 
   if (!session?.user?.id) {
@@ -19,6 +45,18 @@ export async function POST(_req: NextRequest) {
   // Already premium — no need to pay again
   if ((session.user as { plan?: string }).plan === 'premium') {
     return NextResponse.json({ error: 'Already premium' }, { status: 400 });
+  }
+
+  const baseUrl = getBaseUrl(req);
+  if (!baseUrl) {
+    console.error(
+      'Payment create: cannot determine base URL. ' +
+        'Set NEXTAUTH_URL in your environment variables.'
+    );
+    return NextResponse.json(
+      { error: 'Server misconfiguration: base URL unavailable. Contact support.' },
+      { status: 500 }
+    );
   }
 
   // Generate a unique order ID: userId + timestamp
@@ -45,9 +83,9 @@ export async function POST(_req: NextRequest) {
     enabled_payments: ['gopay', 'bank_transfer', 'credit_card', 'other_qris'],
     // Redirect URLs after payment completes (Snap popup closes and redirects)
     callbacks: {
-      finish: `${process.env.NEXTAUTH_URL}/upgrade?status=success`,
-      error: `${process.env.NEXTAUTH_URL}/upgrade?status=error`,
-      pending: `${process.env.NEXTAUTH_URL}/upgrade?status=pending`,
+      finish: `${baseUrl}/upgrade?status=success`,
+      error: `${baseUrl}/upgrade?status=error`,
+      pending: `${baseUrl}/upgrade?status=pending`,
     },
   };
 
