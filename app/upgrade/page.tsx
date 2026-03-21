@@ -260,12 +260,8 @@ export default function UpgradePage(): React.ReactElement {
           type="button"
           onClick={handlePayment}
           disabled={isLoading || isSuccess}
-          className="pay-btn"
-          style={{
-            marginBottom: 12,
-            opacity: isLoading ? 0.75 : 1,
-            background: isLoading || isSuccess ? '#457b9d' : undefined,
-          }}
+          className={`pay-btn${isLoading ? ' loading' : ''}`}
+          style={{ marginBottom: 12 }}
         >
           {isSuccess
             ? '✅ Upgrade Complete'

@@ -144,11 +144,11 @@ export function ScreenerTab({
                 className={selectedCode === s.code ? 'selected' : ''}
                 style={{
                   background:
-                    selectedCode === s.code
-                      ? undefined
-                      : i % 2 === 0
-                      ? '#09131f'
-                      : '#060d18',
+                    selectedCode !== s.code
+                      ? i % 2 === 0
+                        ? '#09131f'
+                        : '#060d18'
+                      : undefined,
                   cursor: 'pointer',
                 }}
               >

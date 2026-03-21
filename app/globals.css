@@ -616,7 +616,7 @@ body {
 .feature-check {
   color: var(--tier-green);
   font-weight: 700;
-  font-size: 14px;
+  font-size: var(--text-base);
   flex-shrink: 0;
   margin-top: 1px;
 }
@@ -635,11 +635,11 @@ body {
   border: none;
   border-radius: var(--radius-lg);
   color: #fff;
-  font-size: 15px;
+  font-size: var(--text-lg);
   font-weight: 700;
   cursor: pointer;
   font-family: 'DM Sans', sans-serif;
-  transition: opacity var(--transition-fast), transform var(--transition-fast);
+  transition: opacity var(--transition-fast), transform var(--transition-fast), background var(--transition-fast);
 }
 
 .pay-btn:hover:not(:disabled) {
@@ -651,9 +651,12 @@ body {
   transform: translateY(0);
 }
 
-.pay-btn:disabled {
-  opacity: 0.6;
+.pay-btn:disabled,
+.pay-btn.loading {
+  background: var(--accent-blue);
+  opacity: 0.75;
   cursor: not-allowed;
+  transform: none;
 }
 
 /* =========================================================

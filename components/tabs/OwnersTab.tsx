@@ -234,7 +234,6 @@ export function OwnersTab({
                 >
                   <td
                     style={{
-                      padding: '10px 8px',
                       color: '#e8f4f8',
                       fontWeight: 600,
                       maxWidth: 240,
