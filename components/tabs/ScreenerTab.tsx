@@ -2,7 +2,6 @@
 
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { HeatCell, FlagPill, Pagination, BlurOverlay } from '@/components/ui';
-import { TIER_COLORS } from '@/lib/constants';
 import { sortStocks, getMinMaxForField } from '@/lib/services/dataTransformService';
 import { applyLimit } from '@/lib/services/planService';
 import type { Stock } from '@/lib/types';
@@ -83,10 +82,10 @@ export function ScreenerTab({
 
   if (loading) {
     return (
-      <div style={{ background: '#09131f', border: '1px solid #132030', borderRadius: 10, padding: 20 }}>
-        <div style={{ fontSize: 11, color: '#6b8aad', letterSpacing: 2, marginBottom: 16 }}>LOADING...</div>
+      <div className="rti-card">
+        <div className="card-eyebrow" style={{ marginBottom: 16 }}>LOADING...</div>
         {[...Array(10)].map((_, i) => (
-          <div key={i} style={{ height: 28, background: '#0d1e30', marginBottom: 2, borderRadius: 2 }} />
+          <div key={i} className="skeleton" style={{ height: 28, marginBottom: 2 }} />
         ))}
       </div>
     );
@@ -100,12 +99,10 @@ export function ScreenerTab({
   ];
 
   return (
-    <div style={{ background: '#09131f', border: '1px solid #132030', borderRadius: 10, padding: 20 }}>
+    <div className="rti-card">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
         <div>
-          <div style={{ fontSize: 11, color: '#6b8aad', letterSpacing: 2, marginBottom: 2 }}>
-            STOCK SCREENER
-          </div>
+          <div className="card-eyebrow">STOCK SCREENER</div>
           <div style={{ fontSize: 13, color: '#e8f4f8' }}>
             {sortedStocks.length} stocks — cells colour-coded by value
           </div>
@@ -113,49 +110,30 @@ export function ScreenerTab({
       </div>
 
       <div style={{ overflowX: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
+        <table className="rti-table">
           <thead>
-            <tr style={{ borderBottom: '2px solid #132030' }}>
+            <tr>
               <th
-                style={{
-                  textAlign: 'left',
-                  padding: 8,
-                  color: '#457B9D',
-                  cursor: 'pointer',
-                  fontFamily: "'DM Mono', monospace",
-                  fontSize: 10,
-                }}
+                className="sortable"
+                style={{ textAlign: 'left' }}
                 onClick={() => handleSort('code')}
               >
                 CODE{sortIcon('code')}
               </th>
-              <th style={{ textAlign: 'left', padding: 8, color: '#457B9D', fontSize: 10 }}>
-                ISSUER
-              </th>
-              <th style={{ textAlign: 'left', padding: 8, color: '#457B9D', fontSize: 10 }}>
-                TIER
-              </th>
+              <th style={{ textAlign: 'left' }}>ISSUER</th>
+              <th style={{ textAlign: 'left' }}>TIER</th>
               {tableCols.map((c) => (
                 <th
                   key={c.key}
-                  style={{
-                    textAlign: 'right',
-                    padding: 8,
-                    color: '#457B9D',
-                    cursor: 'pointer',
-                    fontFamily: "'DM Mono', monospace",
-                    fontSize: 10,
-                    whiteSpace: 'nowrap',
-                  }}
+                  className="sortable"
+                  style={{ textAlign: 'right' }}
                   onClick={() => handleSort(c.key)}
                 >
                   {c.label}
                   {sortIcon(c.key)}
                 </th>
               ))}
-              <th style={{ textAlign: 'left', padding: 8, color: '#457B9D', fontSize: 10 }}>
-                FLAGS
-              </th>
+              <th style={{ textAlign: 'left' }}>FLAGS</th>
             </tr>
           </thead>
           <tbody>
@@ -163,28 +141,19 @@ export function ScreenerTab({
               <tr
                 key={s.code}
                 onClick={() => handleRowClick(s)}
+                className={selectedCode === s.code ? 'selected' : ''}
                 style={{
-                  borderBottom: '1px solid #0d1e30',
                   background:
                     selectedCode === s.code
-                      ? '#132030'
+                      ? undefined
                       : i % 2 === 0
                       ? '#09131f'
                       : '#060d18',
                   cursor: 'pointer',
-                  transition: 'background 0.1s',
                 }}
-                onMouseEnter={(e) =>
-                  selectedCode !== s.code && (e.currentTarget.style.background = '#0d1e30')
-                }
-                onMouseLeave={(e) =>
-                  selectedCode !== s.code &&
-                  (e.currentTarget.style.background = i % 2 === 0 ? '#09131f' : '#060d18')
-                }
               >
                 <td
                   style={{
-                    padding: '6px 8px',
                     color: '#e8f4f8',
                     fontFamily: "'DM Mono', monospace",
                     fontWeight: 600,
@@ -196,7 +165,6 @@ export function ScreenerTab({
                 </td>
                 <td
                   style={{
-                    padding: '6px 8px',
                     color: '#6b8aad',
                     maxWidth: 180,
                     overflow: 'hidden',
@@ -206,14 +174,8 @@ export function ScreenerTab({
                 >
                   {s.issuer}
                 </td>
-                <td style={{ padding: '6px 8px' }}>
-                  <span
-                    style={{
-                      color: TIER_COLORS[s.tier as keyof typeof TIER_COLORS],
-                      fontSize: 10,
-                      fontWeight: 700,
-                    }}
-                  >
+                <td>
+                  <span className={`tier-badge ${s.tier?.toLowerCase()}`}>
                     {s.tier}
                   </span>
                 </td>
@@ -242,7 +204,7 @@ export function ScreenerTab({
                   max={100}
                   fmt={(v) => v.toFixed(1) + '%'}
                 />
-                <td style={{ padding: '6px 8px', minWidth: 120 }}>
+                <td style={{ minWidth: 120 }}>
                   {s.flags?.map((f) => <FlagPill key={f} flag={f} />) || '—'}
                 </td>
               </tr>

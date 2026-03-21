@@ -41,8 +41,8 @@ export function OverviewTab({ stocks, stats, loading = false }: OverviewTabProps
   if (loading) {
     return (
       <div className="overview-grid">
-        <div style={{ background: '#09131f', border: '1px solid #132030', borderRadius: 10, padding: 20, height: 300 }} />
-        <div style={{ background: '#09131f', border: '1px solid #132030', borderRadius: 10, padding: 20, height: 300 }} />
+        <div className="rti-card"><div className="skeleton" style={{ height: 300 }} /></div>
+        <div className="rti-card"><div className="skeleton" style={{ height: 300 }} /></div>
       </div>
     );
   }
@@ -54,11 +54,9 @@ export function OverviewTab({ stocks, stats, loading = false }: OverviewTabProps
   return (
     <div className="overview-grid">
       {/* Risk Distribution Chart */}
-      <div style={{ background: '#09131f', border: '1px solid #132030', borderRadius: 10, padding: 20 }}>
-        <div style={{ fontSize: 11, color: '#6b8aad', letterSpacing: 2, marginBottom: 4 }}>
-          RISK DISTRIBUTION
-        </div>
-        <div style={{ fontSize: 14, color: '#e8f4f8', fontWeight: 600, marginBottom: 16 }}>
+      <div className="rti-card">
+        <div className="card-eyebrow">RISK DISTRIBUTION</div>
+        <div className="card-title">
           {redCount > greenCount + amberCount
             ? 'Most Stocks Have Governance Concerns'
             : 'Risk Spread Across Tiers'}
@@ -89,11 +87,9 @@ export function OverviewTab({ stocks, stats, loading = false }: OverviewTabProps
       </div>
 
       {/* HHI Concentration Chart */}
-      <div style={{ background: '#09131f', border: '1px solid #132030', borderRadius: 10, padding: 20 }}>
-        <div style={{ fontSize: 11, color: '#6b8aad', letterSpacing: 2, marginBottom: 4 }}>
-          HHI CONCENTRATION
-        </div>
-        <div style={{ fontSize: 14, color: '#e8f4f8', fontWeight: 600, marginBottom: 16 }}>
+      <div className="rti-card">
+        <div className="card-eyebrow">HHI CONCENTRATION</div>
+        <div className="card-title">
           {stats && stats.avgHHI > 2500
             ? 'High Average Concentration Across Market'
             : 'Concentration Spread Across Zones'}
@@ -120,10 +116,8 @@ export function OverviewTab({ stocks, stats, loading = false }: OverviewTabProps
       </div>
 
       {/* Key Findings */}
-      <div style={{ background: '#09131f', border: '1px solid #132030', borderRadius: 10, padding: 20, gridColumn: '1 / -1' }}>
-        <div style={{ fontSize: 11, color: '#6b8aad', letterSpacing: 2, marginBottom: 12 }}>
-          KEY FINDINGS
-        </div>
+      <div className="rti-card" style={{ gridColumn: '1 / -1' }}>
+        <div className="card-eyebrow">KEY FINDINGS</div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
           {[
             {
@@ -131,36 +125,42 @@ export function OverviewTab({ stocks, stats, loading = false }: OverviewTabProps
               icon: '⚠️',
               stat: `${redCount} stocks`,
               desc: `classified as Red risk (${stocks.length ? Math.round((redCount / stocks.length) * 100) : 0}%)`,
+              accent: '#e76f51',
             },
             {
               id: 'float',
               icon: '📉',
               stat: `${stats?.avgFloat?.toFixed(1) || '—'}% avg float`,
               desc: 'average free float percentage',
+              accent: stats?.avgFloat && stats.avgFloat < 15 ? '#e76f51' : '#2a9d8f',
             },
             {
               id: 'hhi',
               icon: '📊',
               stat: `HHI avg ${stats?.avgHHI?.toFixed(0) || '—'}`,
               desc: stats?.avgHHI && stats.avgHHI > 2500 ? "deep into 'High concentration' zone" : 'concentration index average',
+              accent: stats?.avgHHI && stats.avgHHI > 2500 ? '#e76f51' : '#e9c46a',
             },
             {
               id: 'amber',
               icon: '🟡',
               stat: `${amberCount} stocks`,
               desc: 'moderate concentration (HHI 1500–2500)',
+              accent: '#e9c46a',
             },
             {
               id: 'green',
               icon: '🟢',
               stat: `${greenCount} stocks`,
               desc: 'well-distributed ownership (HHI < 1500)',
+              accent: '#2a9d8f',
             },
             {
               id: 'total',
               icon: '📈',
               stat: `${stocks.length} total`,
               desc: 'securities tracked in the dashboard',
+              accent: '#a8c8e8',
             },
           ].map((f) => (
             <div
@@ -169,13 +169,16 @@ export function OverviewTab({ stocks, stats, loading = false }: OverviewTabProps
                 background: '#060d18',
                 borderRadius: 8,
                 padding: '12px 14px',
-                borderLeft: '3px solid #1e3a52',
+                borderLeft: `3px solid ${f.accent}44`,
+                borderTop: '1px solid #132030',
+                borderRight: '1px solid #132030',
+                borderBottom: '1px solid #132030',
               }}
             >
-              <div style={{ fontSize: 20, marginBottom: 4 }}>{f.icon}</div>
+              <div style={{ fontSize: 18, marginBottom: 4 }}>{f.icon}</div>
               <div
                 style={{
-                  fontSize: 16,
+                  fontSize: 15,
                   fontWeight: 700,
                   color: '#e8f4f8',
                   fontFamily: "'DM Mono', monospace",

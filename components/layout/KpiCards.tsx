@@ -14,17 +14,10 @@ export function KpiCards({ stats, loading = false, tierFilter, setTierFilter }: 
   if (loading || !stats) {
     return (
       <div className="kpi-cards" data-tour="kpi-cards">
-        {[...Array(8)].map((_, i) => (
-          <div
-            key={i}
-            style={{
-              background: '#09131f',
-              padding: '14px 18px',
-              borderRight: '1px solid #132030',
-            }}
-          >
-            <div style={{ height: 10, background: '#1e3a52', borderRadius: 2, width: '60%', marginBottom: 8 }} />
-            <div style={{ height: 24, background: '#1e3a52', borderRadius: 2, width: '40%' }} />
+        {[...Array(6)].map((_, i) => (
+          <div key={i} className="kpi-card">
+            <div className="skeleton" style={{ height: 10, width: '60%', marginBottom: 8 }} />
+            <div className="skeleton" style={{ height: 24, width: '40%' }} />
           </div>
         ))}
       </div>
@@ -71,35 +64,13 @@ export function KpiCards({ stats, loading = false, tierFilter, setTierFilter }: 
       {cards.map((k) => (
         <div
           key={k.label}
+          className={`kpi-card${k.click ? ' clickable' : ''}`}
           onClick={k.click}
-          style={{
-            background: '#09131f',
-            padding: '14px 18px',
-            cursor: k.click ? 'pointer' : 'default',
-            borderRight: '1px solid #132030',
-            transition: 'background 0.15s',
-          }}
-          onMouseEnter={(e) => k.click && (e.currentTarget.style.background = '#0d1e30')}
-          onMouseLeave={(e) => k.click && (e.currentTarget.style.background = '#09131f')}
+          title={k.click ? `Filter by ${k.label}` : undefined}
         >
-          <div style={{ fontSize: 9, letterSpacing: 2, color: '#457B9D', marginBottom: 4 }}>
-            {k.label}
-          </div>
-          <div
-            style={{
-              fontSize: 24,
-              fontWeight: 700,
-              fontFamily: "'DM Mono', monospace",
-              color: k.color,
-            }}
-          >
-            {k.val}
-          </div>
-          {k.sub && (
-            <div style={{ fontSize: 10, color: '#6b8aad', marginTop: 2 }}>
-              {k.sub}
-            </div>
-          )}
+          <div className="kpi-label">{k.label}</div>
+          <div className="kpi-value" style={{ color: k.color }}>{k.val}</div>
+          {k.sub && <div className="kpi-sub">{k.sub}</div>}
         </div>
       ))}
     </div>

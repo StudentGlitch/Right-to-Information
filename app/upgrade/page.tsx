@@ -115,17 +115,7 @@ export default function UpgradePage(): React.ReactElement {
         color: '#e8f4f8',
       }}
     >
-      <div
-        style={{
-          background: '#09131f',
-          border: '1px solid #1e3a52',
-          borderRadius: 16,
-          padding: 'clamp(24px, 6vw, 48px)',
-          maxWidth: 480,
-          width: '100%',
-          textAlign: 'center',
-        }}
-      >
+      <div className="upgrade-card">
         <div
           style={{
             fontSize: 11,
@@ -141,17 +131,16 @@ export default function UpgradePage(): React.ReactElement {
         {status === 'success' && (
           <div
             style={{
-              background: '#2a9d8f22',
-              border: '1px solid #2a9d8f',
-              borderRadius: 8,
-              padding: '12px 16px',
+              background: '#2a9d8f18',
+              border: '1px solid #2a9d8f55',
+              borderRadius: 10,
+              padding: '14px 18px',
               marginBottom: 20,
               color: '#2a9d8f',
               fontSize: 14,
             }}
           >
-            ✅ Payment successful! Your account has been upgraded to Premium. Please
-            refresh if features are still locked.
+            ✅ Payment successful! Your account has been upgraded to Premium.
             <button
               type="button"
               onClick={() => (window.location.href = '/')}
@@ -169,7 +158,7 @@ export default function UpgradePage(): React.ReactElement {
                 fontFamily: 'DM Sans, sans-serif',
               }}
             >
-              Refresh Now
+              Go to Dashboard →
             </button>
           </div>
         )}
@@ -177,27 +166,26 @@ export default function UpgradePage(): React.ReactElement {
         {status === 'pending' && (
           <div
             style={{
-              background: '#e9c46a22',
-              border: '1px solid #e9c46a',
-              borderRadius: 8,
-              padding: '12px 16px',
+              background: '#e9c46a18',
+              border: '1px solid #e9c46a55',
+              borderRadius: 10,
+              padding: '14px 18px',
               marginBottom: 20,
               color: '#e9c46a',
               fontSize: 14,
             }}
           >
-            ⏳ Payment is pending. We&apos;ll activate your account once it&apos;s
-            confirmed (usually within a few minutes).
+            ⏳ Payment pending — we&apos;ll activate your account once confirmed.
           </div>
         )}
 
         {status === 'error' && (
           <div
             style={{
-              background: '#e76f5122',
-              border: '1px solid #e76f51',
-              borderRadius: 8,
-              padding: '12px 16px',
+              background: '#e76f5118',
+              border: '1px solid #e76f5155',
+              borderRadius: 10,
+              padding: '14px 18px',
               marginBottom: 20,
               color: '#e76f51',
               fontSize: 14,
@@ -207,14 +195,31 @@ export default function UpgradePage(): React.ReactElement {
           </div>
         )}
 
-        <div style={{ fontSize: 48, marginBottom: 16 }}>🔒</div>
+        {/* Lock icon */}
+        <div
+          style={{
+            width: 64,
+            height: 64,
+            borderRadius: '50%',
+            background: '#2a9d8f18',
+            border: '1px solid #2a9d8f44',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: 28,
+            margin: '0 auto 20px',
+          }}
+        >
+          🔒
+        </div>
 
         <h1
           style={{
-            fontSize: 'clamp(20px, 5vw, 28px)',
+            fontSize: 'clamp(20px, 5vw, 26px)',
             fontWeight: 700,
             color: '#e8f4f8',
             marginBottom: 8,
+            letterSpacing: '-0.01em',
           }}
         >
           Unlock Premium Access
@@ -225,65 +230,27 @@ export default function UpgradePage(): React.ReactElement {
             fontSize: 14,
             color: '#a8c8e8',
             lineHeight: 1.6,
-            marginBottom: 28,
+            marginBottom: 24,
           }}
         >
-          Get full access to all governance analytics features for IDX-listed
-          securities.
+          Full governance analytics for every IDX-listed security.
         </p>
 
-        <ul
-          style={{
-            textAlign: 'left',
-            listStyle: 'none',
-            padding: 0,
-            margin: 0,
-          }}
-        >
+        <ul className="feature-list" style={{ marginBottom: 24 }}>
           {FEATURES.map((text, i) => (
-            <li
-              key={i}
-              style={{
-                display: 'flex',
-                alignItems: 'flex-start',
-                gap: 10,
-                marginBottom: 10,
-              }}
-            >
-              <span
-                style={{
-                  color: '#2a9d8f',
-                  fontWeight: 700,
-                  fontSize: 16,
-                  flexShrink: 0,
-                }}
-              >
-                ✓
-              </span>
-              <span
-                style={{
-                  color: '#a8c8e8',
-                  fontSize: 13,
-                  lineHeight: 1.5,
-                }}
-              >
-                {text}
-              </span>
+            <li key={i} className="feature-item">
+              <span className="feature-check">✓</span>
+              <span style={{ color: '#a8c8e8', fontSize: 13, lineHeight: 1.5 }}>{text}</span>
             </li>
           ))}
         </ul>
 
-        <div style={{ marginTop: 24, marginBottom: 20 }}>
-          <div
-            style={{
-              fontSize: 'clamp(28px, 6vw, 36px)',
-              fontWeight: 700,
-              color: '#e8f4f8',
-              fontFamily: 'DM Mono, monospace',
-            }}
-          >
-            Rp 99.000
-          </div>
+        {/* Divider */}
+        <div style={{ height: 1, background: '#132030', margin: '0 0 20px' }} />
+
+        {/* Price */}
+        <div style={{ marginBottom: 20 }}>
+          <div className="price-display">Rp 99.000</div>
           <div style={{ fontSize: 12, color: '#6b8aad', marginTop: 4 }}>
             per month · cancel anytime
           </div>
@@ -293,26 +260,11 @@ export default function UpgradePage(): React.ReactElement {
           type="button"
           onClick={handlePayment}
           disabled={isLoading || isSuccess}
+          className="pay-btn"
           style={{
-            width: '100%',
-            padding: 14,
-            background: isLoading || isSuccess ? '#457b9d' : '#2a9d8f',
-            border: 'none',
-            borderRadius: 10,
-            color: '#fff',
-            fontSize: 16,
-            fontWeight: 700,
-            cursor: isLoading || isSuccess ? 'not-allowed' : 'pointer',
-            fontFamily: 'DM Sans, sans-serif',
-            transition: 'opacity 0.2s',
             marginBottom: 12,
-            opacity: isLoading ? 0.85 : 1,
-          }}
-          onMouseOver={(e) => {
-            if (!isLoading && !isSuccess) e.currentTarget.style.opacity = '0.85';
-          }}
-          onMouseOut={(e) => {
-            e.currentTarget.style.opacity = isLoading ? '0.85' : '1';
+            opacity: isLoading ? 0.75 : 1,
+            background: isLoading || isSuccess ? '#457b9d' : undefined,
           }}
         >
           {isSuccess
@@ -324,12 +276,13 @@ export default function UpgradePage(): React.ReactElement {
 
         <div
           style={{
-            marginTop: 8,
+            marginTop: 4,
             display: 'flex',
             justifyContent: 'center',
-            gap: 8,
+            gap: 6,
             alignItems: 'center',
             flexWrap: 'wrap',
+            marginBottom: 8,
           }}
         >
           <span style={{ fontSize: 10, color: '#6b8aad' }}>Accepts:</span>
@@ -351,13 +304,7 @@ export default function UpgradePage(): React.ReactElement {
         </div>
 
         {error && (
-          <div
-            style={{
-              color: '#e76f51',
-              fontSize: 12,
-              marginTop: 8,
-            }}
-          >
+          <div style={{ color: '#e76f51', fontSize: 12, marginTop: 8 }}>
             {error}
           </div>
         )}
@@ -366,14 +313,17 @@ export default function UpgradePage(): React.ReactElement {
           type="button"
           onClick={() => router.back()}
           style={{
-            marginTop: 20,
+            marginTop: 16,
             fontSize: 12,
             color: '#6b8aad',
             background: 'none',
             border: 'none',
             cursor: 'pointer',
             fontFamily: 'DM Sans, sans-serif',
+            transition: 'color 0.15s',
           }}
+          onMouseOver={(e) => (e.currentTarget.style.color = '#a8c8e8')}
+          onMouseOut={(e) => (e.currentTarget.style.color = '#6b8aad')}
         >
           ← Back to Dashboard
         </button>

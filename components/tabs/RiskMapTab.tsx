@@ -56,19 +56,11 @@ export function RiskMapTab({
   return (
     <div className="scatter-layout" style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
       <div
-        style={{
-          flex: 1,
-          background: '#09131f',
-          border: '1px solid #132030',
-          borderRadius: 10,
-          padding: 20,
-          minWidth: 400,
-        }}
+        className="rti-card"
+        style={{ flex: 1, minWidth: 400 }}
       >
-        <div style={{ fontSize: 11, color: '#6b8aad', letterSpacing: 2, marginBottom: 4 }}>
-          GOVERNANCE RISK MAP
-        </div>
-        <div style={{ fontSize: 14, color: '#e8f4f8', fontWeight: 600, marginBottom: 4 }}>
+        <div className="card-eyebrow">GOVERNANCE RISK MAP</div>
+        <div className="card-title">
           Free Float % vs. HHI Concentration — Click a dot to inspect
         </div>
         <div style={{ fontSize: 11, color: '#6b8aad', marginBottom: 16 }}>

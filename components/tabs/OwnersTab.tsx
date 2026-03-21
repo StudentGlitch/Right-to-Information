@@ -69,17 +69,8 @@ export function OwnersTab({
   }, [isPremium, limitedVisible, filteredOwners, page, pageSize]);
 
   return (
-    <div
-      style={{
-        background: '#09131f',
-        border: '1px solid #132030',
-        borderRadius: 10,
-        padding: 20,
-      }}
-    >
-      <div style={{ fontSize: 11, color: '#6b8aad', letterSpacing: 2, marginBottom: 4 }}>
-        TOP HOLDERS DISSECTION
-      </div>
+    <div className="rti-card">
+      <div className="card-eyebrow">TOP HOLDERS DISSECTION</div>
       <div
         style={{
           display: 'flex',
@@ -219,64 +210,14 @@ export function OwnersTab({
       </div>
 
       <div style={{ overflowX: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
+        <table className="rti-table">
           <thead>
-            <tr style={{ borderBottom: '2px solid #132030' }}>
-              <th
-                style={{
-                  textAlign: 'left',
-                  padding: '10px 8px',
-                  color: '#457B9D',
-                  fontSize: 10,
-                  width: '30%',
-                }}
-              >
-                OWNER NAME
-              </th>
-              <th
-                style={{
-                  textAlign: 'left',
-                  padding: '10px 8px',
-                  color: '#457B9D',
-                  fontSize: 10,
-                  width: '12%',
-                }}
-              >
-                TYPE
-              </th>
-              <th
-                style={{
-                  textAlign: 'right',
-                  padding: '10px 8px',
-                  color: '#457B9D',
-                  fontSize: 10,
-                  width: '10%',
-                }}
-              >
-                STOCKS
-              </th>
-              <th
-                style={{
-                  textAlign: 'right',
-                  padding: '10px 8px',
-                  color: '#457B9D',
-                  fontSize: 10,
-                  width: '12%',
-                }}
-              >
-                ∑ EST. RISK WT
-              </th>
-              <th
-                style={{
-                  textAlign: 'left',
-                  padding: '10px 16px',
-                  color: '#457B9D',
-                  fontSize: 10,
-                  width: '36%',
-                }}
-              >
-                PORTFOLIO EXPOSURE
-              </th>
+            <tr>
+              <th style={{ textAlign: 'left', width: '30%' }}>OWNER NAME</th>
+              <th style={{ textAlign: 'left', width: '12%' }}>TYPE</th>
+              <th style={{ textAlign: 'right', width: '10%' }}>STOCKS</th>
+              <th style={{ textAlign: 'right', width: '12%' }}>∑ EST. RISK WT</th>
+              <th style={{ textAlign: 'left', width: '36%' }}>PORTFOLIO EXPOSURE</th>
             </tr>
           </thead>
           <tbody>
@@ -288,13 +229,12 @@ export function OwnersTab({
                 <tr
                   key={o.name}
                   style={{
-                    borderBottom: '1px solid #132030',
                     background: i % 2 === 0 ? '#09131f' : '#060d18',
                   }}
                 >
                   <td
                     style={{
-                      padding: '14px 8px',
+                      padding: '10px 8px',
                       color: '#e8f4f8',
                       fontWeight: 600,
                       maxWidth: 240,
@@ -345,31 +285,12 @@ export function OwnersTab({
                   >
                     {o.totalPct.toFixed(1)}%
                   </td>
-                  <td style={{ padding: '10px 16px' }}>
-                    <div
-                      style={{
-                        display: 'flex',
-                        flexWrap: 'wrap',
-                        gap: 6,
-                        alignItems: 'center',
-                      }}
-                    >
+                  <td style={{ padding: '8px 16px' }}>
+                    <div className="portfolio-chips">
                       {visibleStocks.map((sym) => (
                         <span
                           key={sym.code}
-                          style={{
-                            background: '#132030',
-                            color: '#e8f4f8',
-                            borderRadius: 4,
-                            padding: '4px 8px',
-                            fontSize: 10,
-                            fontFamily: 'DM Mono, monospace',
-                            border: '1px solid #1e3a52',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: 2,
-                            minWidth: 100,
-                          }}
+                          className="portfolio-chip"
                         >
                           <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                             <b style={{ color: '#a8c8e8' }}>{sym.code}</b>
