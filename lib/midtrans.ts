@@ -17,6 +17,7 @@ export const snap = new Midtrans.Snap({
 
 /** Pricing in IDR (Indonesian Rupiah). Adjust as needed. */
 export const PREMIUM_PRICE_IDR = 15000; // Rp 15.000
+export const ADMIN_FEE_IDR = 2000; // Rp 2.000
 
 /** Product name shown in Midtrans payment page */
 export const PRODUCT_NAME = 'RTI Premium — Monthly Access';

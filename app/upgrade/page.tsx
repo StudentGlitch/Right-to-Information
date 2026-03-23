@@ -65,6 +65,12 @@ export default function UpgradePage(): React.ReactElement {
         headers: { 'Content-Type': 'application/json' },
       });
 
+      if (res.status === 401) {
+        const { signIn } = await import('next-auth/react');
+        await signIn('google', { callbackUrl: '/upgrade' });
+        return;
+      }
+
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         setError(data.error ?? 'Failed to create payment');
@@ -282,10 +288,10 @@ export default function UpgradePage(): React.ReactElement {
               fontFamily: 'DM Mono, monospace',
             }}
           >
-            Rp 99.000
+            Rp 17.000
           </div>
           <div style={{ fontSize: 12, color: '#6b8aad', marginTop: 4 }}>
-            per month · cancel anytime
+            Rp 15.000 plan + Rp 2.000 admin · per month
           </div>
         </div>
 
@@ -319,7 +325,7 @@ export default function UpgradePage(): React.ReactElement {
             ? '✅ Upgrade Complete'
             : isLoading
               ? 'Creating transaction…'
-              : 'Pay with GoPay / Midtrans →'}
+              : 'Pay with QRIS →'}
         </button>
 
         <div
@@ -333,7 +339,7 @@ export default function UpgradePage(): React.ReactElement {
           }}
         >
           <span style={{ fontSize: 10, color: '#6b8aad' }}>Accepts:</span>
-          {['GoPay', 'QRIS', 'Bank Transfer', 'Credit Card'].map((label) => (
+          {['QRIS'].map((label) => (
             <span
               key={label}
               style={{

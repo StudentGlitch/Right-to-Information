@@ -7,7 +7,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/config';
-import { snap, PREMIUM_PRICE_IDR, PRODUCT_NAME } from '@/lib/midtrans';
+import { snap, PREMIUM_PRICE_IDR, ADMIN_FEE_IDR, PRODUCT_NAME } from '@/lib/midtrans';
 
 export async function POST(_req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -27,7 +27,7 @@ export async function POST(_req: NextRequest) {
   const parameter = {
     transaction_details: {
       order_id: orderId,
-      gross_amount: PREMIUM_PRICE_IDR,
+      gross_amount: PREMIUM_PRICE_IDR + ADMIN_FEE_IDR,
     },
     item_details: [
       {
@@ -36,13 +36,19 @@ export async function POST(_req: NextRequest) {
         quantity: 1,
         name: PRODUCT_NAME,
       },
+      {
+        id: 'admin-fee',
+        price: ADMIN_FEE_IDR,
+        quantity: 1,
+        name: 'Admin Fee',
+      },
     ],
     customer_details: {
       first_name: session.user.name ?? 'User',
       email: session.user.email ?? '',
     },
-    // Pre-select GoPay in the popup (user can still choose other methods)
-    enabled_payments: ['gopay', 'bank_transfer', 'credit_card', 'other_qris'],
+    // Restrict payment to QRIS only.
+    enabled_payments: ['other_qris'],
     // Redirect URLs after payment completes (Snap popup closes and redirects)
     callbacks: {
       finish: `${process.env.NEXTAUTH_URL}/upgrade?status=success`,
