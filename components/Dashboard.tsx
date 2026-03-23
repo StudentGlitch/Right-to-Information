@@ -14,7 +14,6 @@ import {
 } from '@/components/tabs';
 import { useStockData, useAnalytics, useStockStatsExtended, usePlan } from '@/lib/hooks';
 import { BlurOverlay } from '@/components/ui';
-import { SpeedInsights } from '@vercel/speed-insights/next';
 import type { DashboardFilters, Stock } from '@/lib/types';
 
 const NAV_TABS: [string, string][] = [
@@ -177,7 +176,6 @@ export function Dashboard(): React.ReactElement {
 
   return (
     <>
-      <SpeedInsights />
       <div className="app-root" style={{ background: '#060d18', minHeight: '100vh', color: '#e8f4f8', padding: '0 0 40px' }}>
         <MobileDrawer
           drawerOpen={drawerOpen}

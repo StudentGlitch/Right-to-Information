@@ -8,7 +8,11 @@ import type {
 } from '@/lib/types';
 import type { Plan } from '@/lib/auth/types';
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017';
+const mongoUri = process.env.MONGODB_URI;
+if (!mongoUri) {
+  throw new Error('MONGODB_URI environment variable is not set');
+}
+const MONGODB_URI: string = mongoUri;
 
 const VALID_OWNER_TYPES: readonly OwnerType[] = [
   'ID', 'CP', 'IB', 'IS', 'SC', 'PF', 'MF', 'YD', 'GY', 'BK', 'OT',
