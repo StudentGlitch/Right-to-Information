@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useEffect } from 'react';
 
 export default function Error({
@@ -51,7 +52,7 @@ export default function Error({
           >
             Try again
           </button>
-          <a
+          <Link
             href="/"
             style={{
               display: 'inline-block',
@@ -65,7 +66,7 @@ export default function Error({
             }}
           >
             Back to Dashboard
-          </a>
+          </Link>
         </div>
       </div>
     </div>
