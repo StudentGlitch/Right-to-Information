@@ -34,6 +34,7 @@ export function Dashboard(): React.ReactElement {
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const completed = localStorage.getItem(TOUR_STORAGE_KEY) === 'true';
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (!completed) setShowTour(true);
   }, []);
 

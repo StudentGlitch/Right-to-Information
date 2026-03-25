@@ -1,38 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { FilterPanel } from '@/components/screener/FilterPanel';
 import { ScreenerTable } from '@/components/screener/ScreenerTable';
-
-interface Stock {
-  ticker: string;
-  name: string;
-  sector: string;
-  price: number;
-  change: number;
-  volume: number;
-  marketCap: number;
-  pe: number;
-  pb: number;
-  roe: number;
-  dividendYield: number;
-  scores: {
-    composite: number;
-    fundamental: number;
-    technical: number;
-    sentiment: number;
-    liquidity: number;
-  };
-  tier: {
-    level: number;
-    label: string;
-    color: string;
-    bg: string;
-  };
-}
+import type { EnrichedStock } from '@/lib/types/unified';
 
 export default function ScreenerPage() {
-  const [stocks, setStocks] = useState<Stock[]>([]);
+  const [stocks, setStocks] = useState<EnrichedStock[]>([]);
   const [sectors, setSectors] = useState<string[]>(['All']);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -40,7 +15,8 @@ export default function ScreenerPage() {
   // Filters
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSector, setSelectedSector] = useState('All');
-  const [selectedTier, setSelectedTier] = useState('');
+  const [selectedAiTier, setSelectedAiTier] = useState('');
+  const [selectedGovTier, setSelectedGovTier] = useState<'Red' | 'Amber' | 'Green' | ''>('');
   const [minScore, setMinScore] = useState('');
   const [maxScore, setMaxScore] = useState('');
   const [sortBy, setSortBy] = useState('composite');
@@ -50,23 +26,24 @@ export default function ScreenerPage() {
   useEffect(() => {
     fetch('/api/screener/filters')
       .then(res => res.json())
-      .then(data => setSectors(data.sectors))
+      .then(data => setSectors(data.sectors || ['All']))
       .catch(err => console.error('Failed to load sectors:', err));
   }, []);
 
   // Fetch stocks when filters change
   useEffect(() => {
     const params = new URLSearchParams();
-    if (searchQuery) params.append('q', searchQuery);
+    if (searchQuery) params.append('search', searchQuery);
     if (selectedSector !== 'All') params.append('sector', selectedSector);
-    if (selectedTier) params.append('tier', selectedTier);
+    if (selectedAiTier) params.append('aiTier', selectedAiTier);
+    if (selectedGovTier) params.append('tier', selectedGovTier);
     if (minScore) params.append('minScore', minScore);
     if (maxScore) params.append('maxScore', maxScore);
     params.append('sortBy', sortBy);
     params.append('order', sortOrder);
 
     setLoading(true);
-    fetch(`/api/screener?${params.toString()}`)
+    fetch(`/api/stocks/enriched?${params.toString()}`)
       .then(res => res.json())
       .then(data => {
         if (data.success) {
@@ -81,7 +58,7 @@ export default function ScreenerPage() {
         setError('Failed to load stocks');
       })
       .finally(() => setLoading(false));
-  }, [searchQuery, selectedSector, selectedTier, minScore, maxScore, sortBy, sortOrder]);
+  }, [searchQuery, selectedSector, selectedAiTier, selectedGovTier, minScore, maxScore, sortBy, sortOrder]);
 
   const handleSort = (field: string) => {
     if (sortBy === field) {
@@ -93,46 +70,95 @@ export default function ScreenerPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Navigation Bar */}
-      <nav className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <a href="/" className="text-lg font-semibold text-gray-900 hover:text-blue-600">
-                Right to Information
-              </a>
-              <div className="ml-8 flex space-x-4">
-                <a href="/" className="text-gray-600 hover:text-gray-900 px-3 py-2 text-sm font-medium">
-                  Dashboard
-                </a>
-                <a href="/screener" className="text-blue-600 px-3 py-2 text-sm font-medium border-b-2 border-blue-600">
-                  AI Stock Screener
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </nav>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">
+    <div style={{ background: '#060d18', minHeight: '100vh' }}>
+      {/* Dark Header */}
+      <div style={{ padding: 'clamp(12px, 4vw, 20px) clamp(12px, 4vw, 28px) 14px', background: 'linear-gradient(180deg, #0d1e30 0%, #09131f 100%)', borderBottom: '1px solid #132030' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+          <Link 
+            href="/" 
+            style={{
+              fontSize: 'clamp(0.875rem, 5vw, 1.375rem)',
+              fontWeight: 700,
+              color: '#e8f4f8',
+              textDecoration: 'none',
+              transition: 'color 0.2s'
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = '#a8d8ea')}
+            onMouseLeave={(e) => (e.currentTarget.style.color = '#e8f4f8')}
+          >
             🇮🇩 JCI Stock Screener
-          </h1>
-          <p className="mt-2 text-gray-600">
-            AI-powered institutional-grade analysis for Indonesian stocks
-          </p>
+          </Link>
         </div>
+      </div>
+
+      {/* Tab Nav */}
+      <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid #132030', padding: 'clamp(12px, 4vw, 28px) 0', background: '#09131f', overflowX: 'auto', scrollbarWidth: 'none' }}>
+        <Link
+          href="/"
+          style={{
+            background: 'none',
+            border: 'none',
+            borderBottom: '2px solid transparent',
+            color: '#6b8aad',
+            padding: '12px 18px',
+            cursor: 'pointer',
+            fontSize: 12,
+            fontFamily: "'DM Mono', monospace",
+            letterSpacing: 1,
+            transition: 'color 0.15s',
+            whiteSpace: 'nowrap',
+            minHeight: 44,
+            textDecoration: 'none',
+            display: 'flex',
+            alignItems: 'center'
+          }}
+          onMouseEnter={(e) => (e.currentTarget.style.color = '#a8d8ea')}
+          onMouseLeave={(e) => (e.currentTarget.style.color = '#6b8aad')}
+        >
+          GOVERNANCE DASHBOARD
+        </Link>
+        <div
+          style={{
+            background: 'none',
+            borderBottom: '2px solid #457b9d',
+            color: '#a8d8ea',
+            padding: '12px 18px',
+            cursor: 'pointer',
+            fontSize: 12,
+            fontFamily: "'DM Mono', monospace",
+            letterSpacing: 1,
+            transition: 'color 0.15s',
+            whiteSpace: 'nowrap',
+            minHeight: 44,
+            display: 'flex',
+            alignItems: 'center'
+          }}
+        >
+          AI SCREENER
+        </div>
+      </div>
+
+      {/* Content Area */}
+      <div style={{ padding: 'clamp(12px, 4vw, 20px) clamp(12px, 4vw, 28px)' }}>
+        {/* Section Label */}
+        <div style={{ fontSize: 9, letterSpacing: 2, color: '#457b9d', fontFamily: "'DM Mono', monospace", marginBottom: 16, textTransform: 'uppercase' }}>
+          AI STOCK SCREENER
+        </div>
+
+        {/* Description */}
+        <p style={{ fontSize: '0.875rem', color: '#a8c8e8', marginBottom: 24, lineHeight: 1.6 }}>
+          Institutional-grade analysis for Indonesian stocks powered by composite scoring algorithms.
+        </p>
 
         {/* Filters */}
         <FilterPanel
           sectors={sectors}
           selectedSector={selectedSector}
           onSectorChange={setSelectedSector}
-          selectedTier={selectedTier}
-          onTierChange={setSelectedTier}
+          selectedAiTier={selectedAiTier}
+          onAiTierChange={setSelectedAiTier}
+          selectedGovTier={selectedGovTier}
+          onGovTierChange={setSelectedGovTier}
           minScore={minScore}
           onMinScoreChange={setMinScore}
           maxScore={maxScore}
@@ -141,21 +167,19 @@ export default function ScreenerPage() {
           onSearchChange={setSearchQuery}
         />
 
-        {/* Results */}
-        <div className="bg-white rounded-lg shadow">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <div className="flex justify-between items-center">
-              <h2 className="text-lg font-semibold text-gray-900">
-                Results ({stocks.length} stocks)
-              </h2>
-              {loading && (
-                <span className="text-sm text-gray-500">Loading...</span>
-              )}
+        {/* Results Container */}
+        <div style={{ background: '#09131f', border: '1px solid #132030', borderRadius: 10, overflow: 'hidden' }}>
+          <div style={{ padding: 16, borderBottom: '1px solid #132030', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ fontSize: 9, letterSpacing: 2, color: '#457b9d', fontFamily: "'DM Mono', monospace", textTransform: 'uppercase' }}>
+              Results · {stocks.length} stocks
             </div>
+            {loading && (
+              <span style={{ fontSize: '0.75rem', color: '#6b8aad' }}>Loading...</span>
+            )}
           </div>
 
           {error ? (
-            <div className="px-6 py-8 text-center text-red-600">
+            <div style={{ padding: 32, textAlign: 'center', color: '#e76f51', fontSize: '0.875rem' }}>
               {error}
             </div>
           ) : (
@@ -169,12 +193,12 @@ export default function ScreenerPage() {
         </div>
 
         {/* Footer Info */}
-        <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <h3 className="text-sm font-semibold text-blue-900 mb-2">
-            📊 How the Score Works
-          </h3>
-          <p className="text-sm text-blue-800">
-            Each stock is scored 0-100 based on: <strong>Fundamental (35%)</strong> + <strong>Technical (30%)</strong> + <strong>Sentiment (20%)</strong> + <strong>Liquidity (15%)</strong>
+        <div style={{ marginTop: 24, background: '#09131f', border: '1px solid #1e3a52', borderRadius: 10, padding: 16 }}>
+          <div style={{ fontSize: 9, letterSpacing: 2, color: '#457b9d', fontFamily: "'DM Mono', monospace", marginBottom: 12, textTransform: 'uppercase' }}>
+            SCORING METHODOLOGY
+          </div>
+          <p style={{ fontSize: '0.875rem', color: '#a8c8e8', lineHeight: 1.6 }}>
+            Composite score combines: <strong>Fundamental (35%)</strong> · <strong>Technical (30%)</strong> · <strong>Sentiment (20%)</strong> · <strong>Liquidity (15%)</strong>
           </p>
         </div>
       </div>

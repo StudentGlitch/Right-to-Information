@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useCallback } from 'react';
+import Link from 'next/link';
 import { TIER_COLORS } from '@/lib/constants';
 import { AuthButton } from './AuthButton';
 import type { Stock } from '@/lib/types';
@@ -105,6 +106,33 @@ export function AppHeader({
               </button>
             )}
           </div>
+          <Link
+            href="/screener"
+            style={{
+              background: '#132030',
+              border: '1px solid #1e3a52',
+              color: '#a8c8e8',
+              borderRadius: 6,
+              padding: '6px 12px',
+              cursor: 'pointer',
+              fontSize: 12,
+              whiteSpace: 'nowrap',
+              textDecoration: 'none',
+              display: 'inline-flex',
+              alignItems: 'center',
+              transition: 'border-color 0.2s, color 0.2s'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = '#457b9d';
+              e.currentTarget.style.color = '#e8f4f8';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = '#1e3a52';
+              e.currentTarget.style.color = '#a8c8e8';
+            }}
+          >
+            Screener
+          </Link>
           {onReplayTour && (
             <button
               onClick={onReplayTour}
